@@ -1,0 +1,49 @@
+{
+    "unicast" : "127.0.0.1",
+    "netmask" : "255.255.255.0",
+    "logging" :
+    { 
+        "level" : "info",
+        "console" : "false",
+        "file" : { "enable" : "false", "path" : "/tmp/vsomeip_mifsa_ota_client.log" },
+        "dlt" : "false"
+    },
+    "applications" :
+    [
+        {
+            "name" : "mifsa_ota_client",
+            "id" : "12002"
+        }
+    ],
+    "services" :
+    [
+        {
+            "service" : "12101",
+            "instance" : "12201",
+            "reliable" : { "port" : "53250", "enable-magic-cookies" : "false" },
+            "events" :
+            [
+                {
+                    "event" : "12620",
+                    "is_field" : "false",
+                    "is_reliable" : "true"
+                }
+            ],
+            "eventgroups" :
+            [
+                {
+                    "eventgroup" : "12620",
+                    "events" : [ "12620" ]
+                }
+            ]
+        }
+    ],
+    "routing" : "mifsa_ota_server",
+    "service-discovery" :
+    {
+        "enable" : "true",
+        "multicast" : "224.244.224.245",
+        "port" : "30499",
+        "protocol" : "udp"
+    }
+}

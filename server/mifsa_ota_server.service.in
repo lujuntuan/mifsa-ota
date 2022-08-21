@@ -1,0 +1,25 @@
+#*********************************************************************************
+#  *Copyright(C): Juntuan.Lu, 2020-2030, All rights reserved.
+#  *Author:  Juntuan.Lu
+#  *Version: 1.0
+#  *Date:  2022/04/01
+#  *Email: 931852884@qq.com
+#  *Description:
+#  *Others:
+#  *Function List:
+#  *History:
+#**********************************************************************************
+
+[Unit]
+Description=The mifsa ota daemon
+After=syslog.target network.target @SUB_SYSTEMD_TARGET@
+
+[Service]
+Type=simple 
+ExecStart=@CMAKE_INSTALL_PREFIX@/@CMAKE_INSTALL_BINDIR@/@SUB_PROJECT_NAME@
+WatchdogSec=5
+Restart=always
+Environment=
+
+[Install]
+WantedBy=multi-user.target

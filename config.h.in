@@ -1,0 +1,36 @@
+/*********************************************************************************
+ *Copyright(C): Juntuan.Lu, 2020-2030, All rights reserved.
+ *Author:  Juntuan.Lu
+ *Version: 1.0
+ *Date:  2022/04/01
+ *Email: 931852884@qq.com
+ *Description:
+ *Others:
+ *Function List:
+ *History:
+ **********************************************************************************/
+
+#ifndef MIFSA_OTA_CONFIG_H
+#define MIFSA_OTA_CONFIG_H
+
+#ifndef MIFSA_OTA_NAME
+#define MIFSA_OTA_NAME "@PROJECT_NAME@"
+#endif
+
+#ifndef MIFSA_OTA_VERSION
+#define MIFSA_OTA_VERSION "@PROJECT_VERSION@"
+#endif
+
+#ifndef MIFSA_OTA_VERSION_MAJOR
+#define MIFSA_OTA_VERSION_MAJOR "@PROJECT_VERSION_MAJOR@"
+#endif
+
+#ifndef MIFSA_OTA_VERSION_MINOR
+#define MIFSA_OTA_VERSION_MINOR "@PROJECT_VERSION_MINOR@"
+#endif
+
+#ifndef MIFSA_OTA_COMMITID
+#define MIFSA_OTA_COMMITID "@MIFSA_COMMITID@"
+#endif
+
+#endif // MIFSA_OTA_CONFIG_H
