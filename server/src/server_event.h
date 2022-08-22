@@ -13,9 +13,9 @@
 #ifndef MIFSA_OTA_SERVER_EVENT_H
 #define MIFSA_OTA_SERVER_EVENT_H
 
-#include "mifsa/ota/domain.h"
-#include "mifsa/ota/setting.h"
-#include "mifsa/ota/upgrade.h"
+#include "core/setting.h"
+#include "mifsa/ota/types/domain.h"
+#include "mifsa/ota/types/upgrade.h"
 #include <mifsa/base/event.h>
 
 MIFSA_NAMESPACE_BEGIN
@@ -42,7 +42,7 @@ public:
         RES_DOMAIN,
     };
     explicit ServerEvent(ServerEventType type, const VariantMap& data = VariantMap()) noexcept
-        : Event(MIFSA_QUEUE_ID_SERVER, type)
+        : Event(MIFSA_OTA_QUEUE_ID_SERVER, type)
         , m_data(data)
     {
     }

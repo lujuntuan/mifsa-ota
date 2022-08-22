@@ -13,8 +13,6 @@
 #ifndef MIFSA_OTA_SERVER_INTERFACE_ROS_H
 #define MIFSA_OTA_SERVER_INTERFACE_ROS_H
 
-#ifdef MIFSA_SUPPORT_ROS
-
 #include "mifsa/ota/server_interface.h"
 #include <mifsa/base/semaphore.h>
 #include <mifsa/base/thread.h>
@@ -120,7 +118,5 @@ private:
 }
 
 MIFSA_NAMESPACE_END
-
-#endif
 
 #endif // MIFSA_OTA_SERVER_INTERFACE_ROS_H

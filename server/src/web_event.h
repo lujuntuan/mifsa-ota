@@ -13,7 +13,7 @@
 #ifndef MIFSA_OTA_WEB_EVENT_H
 #define MIFSA_OTA_WEB_EVENT_H
 
-#include "mifsa/ota/setting.h"
+#include "core/setting.h"
 #include "web_feed.h"
 #include "web_init.h"
 #include <mifsa/base/event.h>
@@ -36,7 +36,7 @@ public:
         REQ_FEEDBACK,
     };
     explicit WebEvent(WebEventType type) noexcept
-        : Event(MIFSA_QUEUE_ID_WEB, type)
+        : Event(MIFSA_OTA_QUEUE_ID_WEB, type)
     {
     }
 };

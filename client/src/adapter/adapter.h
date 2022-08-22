@@ -10,17 +10,10 @@
  *History:
  **********************************************************************************/
 
-#include "mifsa/ota/control_message.h"
-#include "mifsa/utils/string.h"
-#include <iostream>
-
-MIFSA_NAMESPACE_BEGIN
-
-namespace Ota {
-std::ostream& operator<<(std::ostream& ostream, const ControlMessage& controlMessage) noexcept
-{
-    return ostream;
-}
-}
-
-MIFSA_NAMESPACE_END
+#if defined(MIFSA_SUPPORT_ROS)
+#include "client_interface_ros.hpp"
+#elif defined(MIFSA_SUPPORT_VSOMEIP)
+#include "client_interface_vsomeip.hpp"
+#elif defined(MIFSA_SUPPORT_FDBUS)
+#include "client_interface_fdbus.hpp"
+#endif

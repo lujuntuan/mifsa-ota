@@ -10,11 +10,11 @@
  *History:
  **********************************************************************************/
 
-#include "mifsa/ota/setting.h"
-#if (defined(MIFSA_USE_VERIFY_OPENSSL))
+#include "setting.h"
+#if (defined(MIFSA_OTA_USE_VERIFY_OPENSSL))
 #include "core.h"
 #include "helper.h"
-#include "importlib/httplib.hpp"
+#include "hpplib/httplib.hpp"
 #include "utils/verify.h"
 #include <list>
 #include <mifsa/base/elapsed.h>
@@ -53,7 +53,7 @@ namespace Core {
             if (!progressFunction) {
                 return;
             }
-            if (elapsed.get() >= MIFSA_WEB_TRANSFER_INTERVAL_MIN || current >= total) {
+            if (elapsed.get() >= MIFSA_OTA_WEB_TRANSFER_INTERVAL_MIN || current >= total) {
                 elapsed.restart();
                 uint32_t pass = (uint32_t)(verifyElapsed.get() / 1000);
                 uint32_t speed = pass <= 0 ? (uint32_t)(total / 1024) : (uint32_t)(current / 1024 / pass);
@@ -73,7 +73,7 @@ namespace Core {
                 mutex.lock();
                 transfers.update(std::move(transfer), true);
                 mutex.unlock();
-                if (verifyElapsed.get() > MIFSA_WEB_TRANSFER_INTERVAL && current < total) {
+                if (verifyElapsed.get() > MIFSA_OTA_WEB_TRANSFER_INTERVAL && current < total) {
                     mutex.lock();
                     verifyElapsed.restart();
                     transfers.sort();

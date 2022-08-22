@@ -10,10 +10,10 @@
  *History:
  **********************************************************************************/
 
-#ifndef MIFSA_DETAIL_MESSAGE_H
-#define MIFSA_DETAIL_MESSAGE_H
+#ifndef MIFSA_OTA_TYPES_DETAIL_MESSAGE_H
+#define MIFSA_OTA_TYPES_DETAIL_MESSAGE_H
 
-#include "mifsa/ota/domain.h"
+#include "domain.h"
 #include <mifsa/base/variant.h>
 
 MIFSA_NAMESPACE_BEGIN
@@ -52,4 +52,4 @@ VARIANT_DECLARE_TYPE(Ota::DetailMessage, ota_detail_message);
 
 MIFSA_NAMESPACE_END
 
-#endif // MIFSA_DETAIL_MESSAGE_H
+#endif // MIFSA_OTA_TYPES_DETAIL_MESSAGE_H

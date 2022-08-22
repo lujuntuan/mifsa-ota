@@ -13,8 +13,6 @@
 #ifndef MIFSA_OTA_CLIENT_INTERFACE_FDBUS_H
 #define MIFSA_OTA_CLIENT_INTERFACE_FDBUS_H
 
-#ifdef MIFSA_SUPPORT_FDBUS
-
 #ifdef WIN32
 #ifndef __WIN32__
 #define __WIN32__
@@ -185,9 +183,13 @@ public:
     }
     virtual bool sendDomain(const DomainMessage& domainMessage) override
     {
+        if (!CBaseClient::connected()) {
+            return false;
+        }
         mifsa::ota::pb::DomainMessage pb_domainMessage = _getDomainMessage(domainMessage);
         CFdbProtoMsgBuilder builder(pb_domainMessage);
-        return invoke(mifsa::ota::pb::TP_DOMAIN_MSG, builder);
+        CBaseClient::invoke(mifsa::ota::pb::TP_DOMAIN_MSG, builder);
+        return true;
     }
 
 protected:
@@ -202,7 +204,7 @@ protected:
     }
     void onOffline(FDBUS_ONLINE_ARG_TYPE) override
     {
-        _cbConnected(false);
+        cbConnected(false);
     }
     void onBroadcast(CBaseJob::Ptr& msg_ref) override
     {
@@ -242,7 +244,5 @@ private:
 }
 
 MIFSA_NAMESPACE_END
-
-#endif
 
 #endif // MIFSA_OTA_CLIENT_INTERFACE_FDBUS_H

@@ -12,7 +12,7 @@
 
 #include "hawkbit_queue.h"
 #include "core/core.h"
-#include "mifsa/ota/setting.h"
+#include "core/setting.h"
 #include "server.h"
 #include <mifsa/base/log.h>
 #include <mifsa/utils/string.h>
@@ -70,7 +70,7 @@ bool HawkbitQueue::detect()
         postIdle();
         return true;
     }
-#if (MIFSA_WEB_USE_POLLING)
+#if (MIFSA_OTA_WEB_USE_POLLING)
     std::string nextTimeStr = data["config"]["polling"]["sleep"].toString();
     int ms = Utils::getCurrentTimeSecForString(nextTimeStr, "%H:%M:%S") * 1000;
     setCheckTimerInterval(ms); // reset timer

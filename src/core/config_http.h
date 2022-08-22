@@ -13,8 +13,8 @@
 #ifndef MIFSA_OTA_CORE_CONFIG_HTTP_H
 #define MIFSA_OTA_CORE_CONFIG_HTTP_H
 
-#include "importlib/httplib.hpp"
-#include "mifsa/ota/setting.h"
+#include "hpplib/httplib.hpp"
+#include "setting.h"
 #include <mifsa/base/log.h>
 #include <mifsa/base/variant.h>
 #include <mifsa/utils/host.h>
@@ -34,10 +34,10 @@ namespace Core {
             client.set_read_timeout(config.value("web_timeout").toInt() / 1000);
             client.set_write_timeout(config.value("web_timeout").toInt() / 1000);
         } else {
-            client.set_read_timeout(MIFSA_WEB_TIMEOUT / 1000);
-            client.set_write_timeout(MIFSA_WEB_TIMEOUT / 1000);
+            client.set_read_timeout(MIFSA_OTA_WEB_TIMEOUT / 1000);
+            client.set_write_timeout(MIFSA_OTA_WEB_TIMEOUT / 1000);
         }
-#ifdef MIFSA_USE_HTTPS
+#ifdef MIFSA_OTA_USE_HTTPS
         if (config.value("web_ca_cert_path").isValid()) {
             client.set_ca_cert_path(config.value("web_ca_cert_path").toStringCStr());
             client.enable_server_certificate_verification(true);
@@ -93,8 +93,8 @@ namespace Core {
             server.set_read_timeout(config.value("web_timeout").toInt() / 1000);
             server.set_write_timeout(config.value("web_timeout").toInt() / 1000);
         } else {
-            server.set_read_timeout(MIFSA_WEB_TIMEOUT / 1000);
-            server.set_write_timeout(MIFSA_WEB_TIMEOUT / 1000);
+            server.set_read_timeout(MIFSA_OTA_WEB_TIMEOUT / 1000);
+            server.set_write_timeout(MIFSA_OTA_WEB_TIMEOUT / 1000);
         }
         if (config.value("web_html_dir").isValid()) {
             server.set_base_dir(config.value("web_html_dir").toCString(), "/");

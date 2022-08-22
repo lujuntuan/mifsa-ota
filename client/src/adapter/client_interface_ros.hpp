@@ -13,8 +13,6 @@
 #ifndef MIFSA_OTA_CLIENT_INTERFACE_ROS_H
 #define MIFSA_OTA_CLIENT_INTERFACE_ROS_H
 
-#ifdef MIFSA_SUPPORT_ROS
-
 #include "mifsa/ota/client.h"
 #include <mifsa/base/thread.h>
 #include <mifsa_ota_idl/msg/command.hpp>
@@ -60,13 +58,13 @@ public:
             m_nmeaClient = m_node->create_client<srv::Nmea>("mifsa_ota_server_nmea", ::rmw_qos_profile_default, m_callbackGroup);
             m_serverIsReady = m_nmeaClient->service_is_ready();
             if (m_serverIsReady) {
-                _cbConnected(m_serverIsReady);
+                cbConnected(m_serverIsReady);
             }
             m_timer = m_node->create_wall_timer(std::chrono::milliseconds(500), [this]() {
                 bool ready = m_nmeaClient->service_is_ready();
                 if (m_serverIsReady != ready) {
                     m_serverIsReady = ready;
-                    _cbConnected(m_serverIsReady);
+                    cbConnected(m_serverIsReady);
                 }
             });
             sema.reset();
@@ -132,7 +130,5 @@ private:
 }
 
 MIFSA_NAMESPACE_END
-
-#endif
 
 #endif // MIFSA_OTA_CLIENT_INTERFACE_ROS_H

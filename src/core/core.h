@@ -13,8 +13,9 @@
 #ifndef MIFSA_OTA_CORE_H
 #define MIFSA_OTA_CORE_H
 
-#include "mifsa/ota/transfer.h"
-#include "mifsa/ota/upgrade.h"
+#include "mifsa/ota/types/transfer.h"
+#include "mifsa/ota/types/upgrade.h"
+#include "setting.h"
 #include "status.h"
 #include <atomic>
 
@@ -30,13 +31,13 @@ namespace Core {
         const BreakFunction& breakFunction = nullptr,
         const ProgressFunction& progressFunction = nullptr);
 
-#ifdef MIFSA_CLIENT_TYPE
+#ifdef MIFSA_OTA_BUILD_CLIENT
     extern Status patch(const std::string& dir, const std::vector<std::string>& paths, Files& newFiles,
         const BreakFunction& breakFunction = nullptr,
         const ProgressFunction& progressFunction = nullptr);
 #endif
 
-#ifdef MIFSA_SERVER_TYPE
+#ifdef MIFSA_OTA_BUILD_SERVER
     using DistributeHandle = std::atomic<void*>;
     using Token = std::pair<std::string, std::string>;
     extern Status pull(const std::string& dir, const Files& files, const VariantMap& config,

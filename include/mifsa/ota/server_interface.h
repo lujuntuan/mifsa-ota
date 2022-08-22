@@ -13,9 +13,9 @@
 #ifndef MIFSA_SERVER_OTA_INTERFACE_H
 #define MIFSA_SERVER_OTA_INTERFACE_H
 
-#include "control_message.h"
-#include "detail_message.h"
-#include "domain_message.h"
+#include "types/control_message.h"
+#include "types/detail_message.h"
+#include "types/domain_message.h"
 #include <mifsa/module/server.hpp>
 
 MIFSA_NAMESPACE_BEGIN

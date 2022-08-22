@@ -10,12 +10,12 @@
  *History:
  **********************************************************************************/
 
-#ifndef MIFSA_OTA_DOMAIN_H
-#define MIFSA_OTA_DOMAIN_H
+#ifndef MIFSA_OTA_TYPES_DOMAIN_H
+#define MIFSA_OTA_TYPES_DOMAIN_H
 
 #include "mifsa/base/elapsed.h"
-#include "mifsa/ota/transfer.h"
-#include "mifsa/ota/upgrade.h"
+#include "transfer.h"
+#include "upgrade.h"
 #include <functional>
 #include <vector>
 
@@ -151,4 +151,4 @@ VARIANT_DECLARE_TYPE(Ota::Details, ota_details);
 
 MIFSA_NAMESPACE_END
 
-#endif // MIFSA_OTA_DOMAIN_H
+#endif // MIFSA_OTA_TYPES_DOMAIN_H

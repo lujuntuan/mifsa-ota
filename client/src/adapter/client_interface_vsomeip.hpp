@@ -13,8 +13,6 @@
 #ifndef MIFSA_OTA_CLIENT_INTERFACE_VSOMEIP_H
 #define MIFSA_OTA_CLIENT_INTERFACE_VSOMEIP_H
 
-#ifdef MIFSA_SUPPORT_VSOMEIP
-
 #include "mifsa/ota/client.h"
 #include <CommonAPI/CommonAPI.hpp>
 #include <mifsa/utils/dir.h>
@@ -147,9 +145,9 @@ public:
         m_commonApiProxy = CommonAPI::Runtime::get()->buildProxy<interfacesProxy>("local", "commonapi.mifsa.ota.interfaces", "mifsa_ota_client");
         m_commonApiProxy->getProxyStatusEvent().subscribe([this](const CommonAPI::AvailabilityStatus& status) {
             if (status == CommonAPI::AvailabilityStatus::AVAILABLE) {
-                _cbConnected(true);
+                cbConnected(true);
             } else {
-                _cbConnected(false);
+                cbConnected(false);
             }
         });
         m_commonApiProxy->getDispatchControlMessageEvent().subscribe([this](const interfaces::ControlMessage& ci_controlMessage) {
@@ -207,7 +205,5 @@ private:
 }
 
 MIFSA_NAMESPACE_END
-
-#endif
 
 #endif // MIFSA_OTA_CLIENT_INTERFACE_VSOMEIP_H

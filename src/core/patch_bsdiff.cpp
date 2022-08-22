@@ -10,11 +10,11 @@
  *History:
  **********************************************************************************/
 
-#include "mifsa/ota/setting.h"
-#if (defined(MIFSA_CLIENT_TYPE) && defined(MIFSA_USE_PATCH_BSDIFF))
+#include "setting.h"
+#if (defined(MIFSA_OTA_BUILD_CLIENT) && defined(MIFSA_OTA_USE_PATCH_BSDIFF))
 #include "core.h"
 #include "helper.h"
-#include "importlib/httplib.hpp"
+#include "hpplib/httplib.hpp"
 #include "utils/dispatch.h"
 #include <mifsa/base/log.h>
 #include <mifsa/utils/dir.h>

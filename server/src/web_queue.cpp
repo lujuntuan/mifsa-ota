@@ -28,7 +28,7 @@ namespace Ota {
 struct WebHelper {
     bool hasInited = false;
     int distributePort = 0;
-    int checkInterval = MIFSA_WEB_CHECK_INTERVAL;
+    int checkInterval = MIFSA_OTA_WEB_CHECK_INTERVAL;
     std::atomic<WebQueue::State> state;
     std::string downloadDir;
     std::string localUrl;
@@ -40,7 +40,7 @@ struct WebHelper {
 };
 
 WebQueue::WebQueue()
-    : Queue(MIFSA_QUEUE_ID_WEB)
+    : Queue(MIFSA_OTA_QUEUE_ID_WEB)
 {
     MIFSA_HELPER_CREATE(m_hpr);
     if (mifsa_ota_server->config().value("net_interface").isValid()) {
@@ -61,7 +61,7 @@ WebQueue::WebQueue()
     if (mifsa_ota_server->config().value("distribute_port").isValid()) {
         m_hpr->distributePort = mifsa_ota_server->config().value("distribute_port").toInt();
     } else {
-#ifdef MIFSA_USE_HTTPS
+#ifdef MIFSA_OTA_USE_HTTPS
         m_hpr->distributePort = 9443;
 #else
         m_hpr->distributePort = 9080;
@@ -70,14 +70,14 @@ WebQueue::WebQueue()
     if (mifsa_ota_server->config().value("upgrade_check_interval").isValid()) {
         m_hpr->checkInterval = (uint32_t)mifsa_ota_server->config().value("upgrade_check_interval").toInt();
     }
-#if defined(MIFSA_USE_DOWNLOAD_HTTP) && defined(MIFSA_USE_DISTRIBUTE_HTTP)
-#ifdef MIFSA_USE_HTTPS
+#if defined(MIFSA_OTA_USE_DOWNLOAD_HTTP) && defined(MIFSA_OTA_USE_DISTRIBUTE_HTTP)
+#ifdef MIFSA_OTA_USE_HTTPS
     std::string protocName = "https://";
 #else
     std::string protocName = "http://";
 #endif
 #endif
-    m_hpr->localUrl = protocName + m_hpr->ipAddress + ":" + std::to_string(m_hpr->distributePort) + "/" + MIFSA_WEB_PULL_FUNC_NAME;
+    m_hpr->localUrl = protocName + m_hpr->ipAddress + ":" + std::to_string(m_hpr->distributePort) + "/" + MIFSA_OTA_WEB_PULL_FUNC_NAME;
 
     m_hpr->checkTimer = createTimer(m_hpr->checkInterval, true, std::bind(&WebQueue::checkUpgrade, this));
     m_hpr->workThread.setEndCb([this]() {
@@ -320,7 +320,7 @@ void WebQueue::transformFiles(std::string& id, Files& files, bool webInstead)
 
 void WebQueue::download(const std::string& id, const Files& files)
 {
-    Utils::removeSubOldDirs(m_hpr->downloadDir, MIFSA_DOWNLOAD_KEEP_FILE_COUNT);
+    Utils::removeSubOldDirs(m_hpr->downloadDir, MIFSA_OTA_DOWNLOAD_KEEP_FILE_COUNT);
     auto status = Core::pull(
         m_hpr->downloadDir + "/" + id, files, mifsa_ota_server->config(),
         [this]() {

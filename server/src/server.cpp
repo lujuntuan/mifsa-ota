@@ -11,9 +11,7 @@
  **********************************************************************************/
 
 #include "server.h"
-#include "adapter/server_interface_fdbus.hpp"
-#include "adapter/server_interface_ros.hpp"
-#include "adapter/server_interface_vsomeip.hpp"
+#include "adapter/adapter.h"
 #include "hawkbit_queue.h"
 #include "server_event.h"
 #include "web_event.h"
@@ -69,26 +67,25 @@ struct ServerHelper {
     Depends depends;
     Elapsed stateElapsed;
     WebFeed webFeed;
+    const Application::Arg argVersion { "v", "version", " module version" };
+    const Application::Arg argUrl { "u", "url", " server url", "http://localhost:8080" };
+    const Application::Arg argTenant { "t", "tenant", " tenant name", "DEFAULT" };
+    const Application::Arg argId { "i", "id", " id name", "123456789" };
+    const Application::Arg argToken { "k", "token", " token number", "" };
 };
 
-const Application::Arg _arg_version("v", "version", " module version");
-const Application::Arg _arg_url("u", "url", " server url", "http://localhost:8080");
-const Application::Arg _arg_tenant("t", "tenant", " tenant name", "DEFAULT");
-const Application::Arg _arg_id("i", "id", " id name", "123456789");
-const Application::Arg _arg_token("k", "token", " token number", "");
-
 Server::Server(int argc, char** argv)
-    : ServerProxy(argc, argv, "ota")
+    : ServerProxy(argc, argv, "ota", MIFSA_OTA_QUEUE_ID_SERVER)
 {
     setInstance(this);
+    MIFSA_HELPER_CREATE(m_hpr);
     //
-    parserArgs({ _arg_version, _arg_url, _arg_tenant, _arg_id, _arg_token });
-    if (getArgValue(_arg_version).toBool()) {
+    parserArgs({ m_hpr->argVersion, m_hpr->argUrl, m_hpr->argTenant, m_hpr->argId, m_hpr->argToken });
+    if (getArgValue(m_hpr->argVersion).toBool()) {
         LOG_DEBUG(MIFSA_OTA_VERSION);
         std::exit(0);
+        return;
     }
-    MIFSA_HELPER_CREATE(m_hpr);
-    m_hpr->domainsConfig = readConfig("mifsa_ota_domains.json");
     static std::mutex mutex;
     setMutex(mutex);
     m_hpr->webQueue.setMutex(mutex);
@@ -96,12 +93,12 @@ Server::Server(int argc, char** argv)
         LOG_WARNING("web queue is running");
         return;
     }
-    Variant webUrl = getArgValue(_arg_url, "web_url");
-    Variant tenant = getArgValue(_arg_tenant, "tenant");
-    Variant id = getArgValue(_arg_id, "id");
-    Variant token = getArgValue(_arg_token, "token");
-    // GatewayToken or TargetToken
-    WebInit webInit(webUrl.toString(), tenant.toString(), id.toString(), { "GatewayToken", token.toString() });
+    m_hpr->domainsConfig = readConfig("mifsa_ota_domains.json");
+    Variant webUrl = getArgValue(m_hpr->argUrl, "web_url");
+    Variant tenant = getArgValue(m_hpr->argTenant, "tenant");
+    Variant id = getArgValue(m_hpr->argId, "id");
+    Variant token = getArgValue(m_hpr->argToken, "token");
+    WebInit webInit(webUrl.toString(), tenant.toString(), id.toString(), { "GatewayToken", token.toString() }); // GatewayToken or TargetToken
     m_hpr->webQueue.postEvent(std::make_shared<WebInitEvent>(webInit));
     m_hpr->webQueue.asyncRun();
     //
@@ -213,7 +210,7 @@ void Server::begin()
         m_hpr->firstStart = true;
     }
     //
-    m_hpr->processDomainsTimer = createTimer(MIFSA_PROCESS_DOMAIN_TIME, true, std::bind(&Server::processDomains, this));
+    m_hpr->processDomainsTimer = createTimer(MIFSA_OTA_PROCESS_DOMAIN_TIME, true, std::bind(&Server::processDomains, this));
     m_hpr->processDomainsTimer->start();
     // onStart();
 }
@@ -235,7 +232,7 @@ void Server::eventChanged(const std::shared_ptr<Event>& event)
     if (serverEvent->type() == ServerEvent::RES_ERROR) {
         int error = serverEvent->data().value("error").toInt();
         if (m_hpr->state == MR_DOWNLOAD || m_hpr->state == MR_VERIFY || m_hpr->state == MR_DISTRIBUTE) {
-            if (m_hpr->retryTimes < MIFSA_RETRY_TIMES) {
+            if (m_hpr->retryTimes < MIFSA_OTA_RETRY_TIMES) {
                 // wait(10);
                 LOG_WARNING("retry download");
                 download();
@@ -912,7 +909,7 @@ void Server::sendControlMessage(Control control, bool cache)
     }
     if (!cache) {
         m_hpr->controlMessageId++;
-        if (m_hpr->controlMessageId > MIFSA_MESSAGE_TOTAL_COUNT) {
+        if (m_hpr->controlMessageId > MIFSA_OTA_MESSAGE_TOTAL_COUNT) {
             m_hpr->controlMessageId = 0;
         }
     }
@@ -925,7 +922,7 @@ void Server::sendDetailMessage(bool cache)
 {
     if (!cache) {
         m_hpr->detailMessageId++;
-        if (m_hpr->detailMessageId > MIFSA_MESSAGE_TOTAL_COUNT) {
+        if (m_hpr->detailMessageId > MIFSA_OTA_MESSAGE_TOTAL_COUNT) {
             m_hpr->detailMessageId = 0;
         }
     }
@@ -940,7 +937,7 @@ static int getMaxDeployTime(const Detail& d)
     if (maxDeployTime <= 0) {
         maxDeployTime = d.domain.meta.value("max_deploy_time").toInt();
         if (maxDeployTime <= 0) {
-            maxDeployTime = MIFSA_MAX_DEPLOY_TIME_CLIENT;
+            maxDeployTime = MIFSA_OTA_MAX_DEPLOY_TIME_CLIENT;
         }
     }
     return maxDeployTime;
@@ -952,7 +949,7 @@ static int getMaxRestartTime(const Detail& d)
     if (maxRestartTime <= 0) {
         maxRestartTime = d.domain.meta.value("max_restart_time").toInt();
         if (maxRestartTime <= 0) {
-            maxRestartTime = MIFSA_MAX_DEPLOY_RESTART_TIME_CLIENT;
+            maxRestartTime = MIFSA_OTA_MAX_DEPLOY_RESTART_TIME_CLIENT;
         }
     }
     return maxRestartTime;
@@ -973,9 +970,9 @@ void Server::processDomains()
         return;
     }
     if (m_hpr->state == MR_PENDING) {
-        uint32_t maxReadyTime = MIFSA_MAX_PENDING_TIME;
+        uint32_t maxReadyTime = MIFSA_OTA_MAX_PENDING_TIME;
         if (m_hpr->firstStart) {
-            maxReadyTime = MIFSA_MAX_PENDING_TIME_FIRST;
+            maxReadyTime = MIFSA_OTA_MAX_PENDING_TIME_FIRST;
         }
         if (m_hpr->stateElapsed.get() > maxReadyTime) {
             LOG_WARNING("pending time out");
@@ -983,37 +980,37 @@ void Server::processDomains()
             return;
         }
     } else if (m_hpr->state == MR_DOWNLOAD_ASK || m_hpr->state == MR_DEPLOY_ASK || m_hpr->state == MR_CANCEL_ASK || m_hpr->state == MR_RESUME_ASK) {
-        //        if (m_hpr->stateElapsed.get() > MIFSA_MAX_ASK_TIME) {
+        //        if (m_hpr->stateElapsed.get() > MIFSA_OTA_MAX_ASK_TIME) {
         //            LOG_WARNING("ask time out");
         //            feedback(false, 1911);
         //            return;
         //        }
     } else if (m_hpr->state == MR_DONE_ASK || m_hpr->state == MR_ERROR_ASK) {
-        //        if (m_hpr->stateElapsed.get() > MIFSA_MAX_ASK_TIME) {
+        //        if (m_hpr->stateElapsed.get() > MIFSA_OTA_MAX_ASK_TIME) {
         //            LOG_WARNING("ask time out");
         //            feedback(false, 1912);
         //            return;
         //        }
     } else if (m_hpr->state == MR_DOWNLOAD || m_hpr->state == MR_DISTRIBUTE) {
-        if (m_hpr->stateElapsed.get() > MIFSA_MAX_TRANSFER_TIME) {
+        if (m_hpr->stateElapsed.get() > MIFSA_OTA_MAX_TRANSFER_TIME) {
             LOG_WARNING("transfer time out");
             feedback(false, 1913);
             return;
         }
     } else if (m_hpr->state == MR_VERIFY) {
-        if (m_hpr->stateElapsed.get() > MIFSA_MAX_VERIFY_TIME) {
+        if (m_hpr->stateElapsed.get() > MIFSA_OTA_MAX_VERIFY_TIME) {
             LOG_WARNING("verify time out");
             feedback(false, 1914);
             return;
         }
     } else if (m_hpr->state == MR_DEPLOY) {
-        if (m_hpr->stateElapsed.get() > MIFSA_MAX_DEPLOY_TIME) {
+        if (m_hpr->stateElapsed.get() > MIFSA_OTA_MAX_DEPLOY_TIME) {
             LOG_WARNING("deploy time out");
             feedback(false, 1915);
             return;
         }
     } else if (m_hpr->state == MR_CANCEL) {
-        if (m_hpr->stateElapsed.get() > MIFSA_MAX_CANCEL_TIME) {
+        if (m_hpr->stateElapsed.get() > MIFSA_OTA_MAX_CANCEL_TIME) {
             LOG_WARNING("cancel time out");
             feedback(false, 1916);
             return;
@@ -1038,7 +1035,7 @@ void Server::processDomains()
             errorCount++;
         }
         if (d.domain.state != WR_OFFLINE && d.heartbeat.active()) {
-            if (d.heartbeat.get() > MIFSA_HEARTBEAT_TIME_OUT) {
+            if (d.heartbeat.get() > MIFSA_OTA_HEARTBEAT_TIME_OUT) {
                 d.domain.last = d.domain.state;
                 d.domain.state = WR_OFFLINE;
                 detailChanged = true;

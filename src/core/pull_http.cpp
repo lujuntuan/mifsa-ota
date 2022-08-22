@@ -10,8 +10,8 @@
  *History:
  **********************************************************************************/
 
-#include "mifsa/ota/setting.h"
-#if (defined(MIFSA_SERVER_TYPE) && defined(MIFSA_USE_PULL_HTTP))
+#include "setting.h"
+#if (defined(MIFSA_OTA_BUILD_SERVER) && defined(MIFSA_OTA_USE_PULL_HTTP))
 #include "core.h"
 
 MIFSA_NAMESPACE_BEGIN

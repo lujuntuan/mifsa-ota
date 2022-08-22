@@ -10,12 +10,12 @@
  *History:
  **********************************************************************************/
 
-#include "mifsa/ota/setting.h"
-#if (defined(MIFSA_SERVER_TYPE) && defined(MIFSA_USE_MESSAGE_HTTP))
+#include "setting.h"
+#if (defined(MIFSA_OTA_BUILD_SERVER) && defined(MIFSA_OTA_USE_MESSAGE_HTTP))
 #include "config_http.h"
 #include "core.h"
 #include "helper.h"
-#include "importlib/httplib.hpp"
+#include "hpplib/httplib.hpp"
 #include <mifsa/base/log.h>
 
 MIFSA_NAMESPACE_BEGIN

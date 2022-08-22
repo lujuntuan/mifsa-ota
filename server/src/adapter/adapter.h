@@ -10,21 +10,10 @@
  *History:
  **********************************************************************************/
 
-#ifndef MIFSA_OTA_PLATFORM_H
-#define MIFSA_OTA_PLATFORM_H
-
-#include <mifsa/module/platform.hpp>
-
-MIFSA_NAMESPACE_BEGIN
-
-namespace Ota {
-class PlatformInterface : public PlatformInterfaceBase {
-    MIFSA_PLUGIN_REGISTER("mifsa_ota_platform")
-public:
-    virtual std::string getNmea() = 0;
-};
-}
-
-MIFSA_NAMESPACE_END
-
-#endif // MIFSA_OTA_PLATFORM_H
+#if defined(MIFSA_SUPPORT_ROS)
+#include "server_interface_ros.hpp"
+#elif defined(MIFSA_SUPPORT_VSOMEIP)
+#include "server_interface_vsomeip.hpp"
+#elif defined(MIFSA_SUPPORT_FDBUS)
+#include "server_interface_fdbus.hpp"
+#endif

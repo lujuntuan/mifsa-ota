@@ -13,8 +13,6 @@
 #ifndef MIFSA_OTA_SERVER_INTERFACE_VSOMEIP_H
 #define MIFSA_OTA_SERVER_INTERFACE_VSOMEIP_H
 
-#ifdef MIFSA_SUPPORT_VSOMEIP
-
 #include "server.h"
 #include <CommonAPI/CommonAPI.hpp>
 #include <mifsa/utils/dir.h>
@@ -188,7 +186,5 @@ private:
 }
 
 MIFSA_NAMESPACE_END
-
-#endif
 
 #endif // MIFSA_OTA_SERVER_INTERFACE_VSOMEIP_H

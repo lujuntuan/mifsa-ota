@@ -14,9 +14,7 @@
 #define MIFSA_OTA_SERVER_H
 
 #include "mifsa/ota/config.h"
-#include "mifsa/ota/domain.h"
 #include "mifsa/ota/server_interface.h"
-#include "mifsa/ota/upgrade.h"
 #include <mifsa/base/singleton.h>
 #include <mifsa/module/server.hpp>
 

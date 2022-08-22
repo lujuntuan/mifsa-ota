@@ -10,7 +10,7 @@
  *History:
  **********************************************************************************/
 
-#include "mifsa/ota/detail_message.h"
+#include "mifsa/ota/types/detail_message.h"
 #include "mifsa/utils/string.h"
 #include <iostream>
 

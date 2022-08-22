@@ -10,8 +10,8 @@
  *History:
  **********************************************************************************/
 
-#ifndef MIFSA_OTA_TRANSFER_H
-#define MIFSA_OTA_TRANSFER_H
+#ifndef MIFSA_OTA_TYPES_TRANSFER_H
+#define MIFSA_OTA_TYPES_TRANSFER_H
 
 #include "mifsa/base/define.h"
 #include "mifsa/base/variant.h"
@@ -52,4 +52,4 @@ VARIANT_DECLARE_TYPE(Ota::Transfers, ota_transfers);
 
 MIFSA_NAMESPACE_END
 
-#endif // MIFSA_OTA_TRANSFER_H
+#endif // MIFSA_OTA_TYPES_TRANSFER_H

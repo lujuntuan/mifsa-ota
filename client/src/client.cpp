@@ -11,12 +11,10 @@
  **********************************************************************************/
 
 #include "mifsa/ota/client.h"
-#include "adapter/client_interface_fdbus.hpp"
-#include "adapter/client_interface_ros.hpp"
-#include "adapter/client_interface_vsomeip.hpp"
+#include "adapter/adapter.h"
 #include "client_event.h"
 #include "core/core.h"
-#include "mifsa/ota/setting.h"
+#include "core/setting.h"
 #include <mifsa/base/thread.h>
 #include <mifsa/utils/dir.h>
 #include <mifsa/utils/system.h>
@@ -50,21 +48,27 @@ struct ClientHelper {
     static std::string _clientName;
     static std::string _clientGuid;
     static bool _hasRegister;
+    const Application::Arg argVersion { "v", "version", " module version" };
+    const Application::Arg argName { "n", "name", " domain name", "unknown" };
+    const Application::Arg argGuid { "g", "guid", " domain guid", "" };
 };
-
-const Application::Arg _arg_name("n", "name", " domain name", "unknown");
-const Application::Arg _arg_guid("g", "guid", " domain guid", "");
 
 std::string ClientHelper::_clientName;
 std::string ClientHelper::_clientGuid;
 bool ClientHelper::_hasRegister = false;
 
 Client::Client(int argc, char** argv)
-    : ClientProxy(argc, argv, "mifsa_ota_server")
+    : ClientProxy(argc, argv, "mifsa_ota_server", MIFSA_OTA_QUEUE_ID_CLIENT)
 {
     setInstance(this);
-    //
     MIFSA_HELPER_CREATE(m_hpr);
+    //
+    parserArgs({ m_hpr->argVersion, m_hpr->argName, m_hpr->argGuid });
+    if (getArgValue(m_hpr->argVersion).toBool()) {
+        LOG_DEBUG(MIFSA_OTA_VERSION);
+        std::exit(0);
+        return;
+    }
     static std::mutex mutex;
     setMutex(mutex);
     if (config().value("download_dir").isValid()) {
@@ -76,9 +80,9 @@ Client::Client(int argc, char** argv)
         m_hpr->name = ClientHelper::_clientName;
         m_hpr->guid = ClientHelper::_clientGuid;
     } else {
-        Variant name = getArgValue(_arg_name, "name");
+        Variant name = getArgValue(m_hpr->argName, "name");
         m_hpr->name = name.toString();
-        Variant guid = getArgValue(_arg_guid, "guid");
+        Variant guid = getArgValue(m_hpr->argGuid, "guid");
         m_hpr->guid = guid.toString();
     }
     m_hpr->detail.domain.state = WR_IDLE;
@@ -243,7 +247,7 @@ void Client::postDetailAnswer(Answer answer)
 
 void Client::begin()
 {
-    m_hpr->replyControlTimer = createTimer(MIFSA_PROCESS_DOMAIN_TIME, true, std::bind(&Client::sendDomainMessage, this));
+    m_hpr->replyControlTimer = createTimer(MIFSA_OTA_PROCESS_DOMAIN_TIME, true, std::bind(&Client::sendDomainMessage, this));
     m_hpr->replyControlTimer->start();
     sendDomainMessage();
 }
@@ -636,9 +640,9 @@ void Client::download(const std::string& id, const Files& files)
         }
         return false;
     };
-    Utils::removeSubOldDirs(m_hpr->downloadDir, MIFSA_DOWNLOAD_KEEP_FILE_COUNT);
+    Utils::removeSubOldDirs(m_hpr->downloadDir, MIFSA_OTA_DOWNLOAD_KEEP_FILE_COUNT);
     int times = 0;
-    while (times < MIFSA_RETRY_TIMES) {
+    while (times < MIFSA_OTA_RETRY_TIMES) {
         if (times > 0) {
             LOG_WARNING("retry download");
         }

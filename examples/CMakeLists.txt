@@ -12,38 +12,23 @@
 
 project(examples)
 
-add_executable(
-    mifsa_ota_sample
-    sample.cpp
-    )
-add_executable(
-    mifsa_ota_sample_c
-    sample.c
-    )
-target_link_libraries(
-    mifsa_ota_sample
-    PRIVATE
-    mifsa_base
-    mifsa_ota
-)
-target_link_libraries(
-    mifsa_ota_sample_c
-    PRIVATE
-    mifsa_base
-    mifsa_ota
-    mifsa_ota_c
-)
-install(
-    TARGETS
-    mifsa_ota_sample
-    mifsa_ota_sample_c
-    RUNTIME
-    DESTINATION
-    ${CMAKE_INSTALL_BINDIR}
-    ARCHIVE
-    DESTINATION
-    ${CMAKE_INSTALL_LIBDIR}
-    LIBRARY
-    DESTINATION
-    ${CMAKE_INSTALL_LIBDIR}
-    )
+if (TARGET mifsa_${MIFSA_MODULE_TYPE})
+    add_subdirectory(sample)
+    option(MIFSA_OTA_EXAMPLE_USE_QT6 "Use Qt6 library" OFF)
+    if(MIFSA_OTA_EXAMPLE_USE_QT6)
+        find_package(QT NAMES Qt6 QUIET)
+    else()
+        find_package(QT NAMES Qt5 QUIET)
+    endif()
+    if(QT_VERSION_MAJOR)
+        find_package(Qt${QT_VERSION_MAJOR} QUIET COMPONENTS
+            Core Widgets
+        )
+    endif()
+    if(Qt${QT_VERSION_MAJOR}_FOUND)
+        add_subdirectory(viewer)
+    endif()
+endif()
+if (TARGET mifsa_${MIFSA_MODULE_TYPE}_c)
+    add_subdirectory(sample_c)
+endif()

@@ -10,7 +10,7 @@
  *History:
  **********************************************************************************/
 
-#include "mifsa/ota/domain.h"
+#include "mifsa/ota/types/domain.h"
 #include "mifsa/utils/string.h"
 #include <algorithm>
 #include <iostream>

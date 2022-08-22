@@ -13,7 +13,7 @@
 #ifndef MIFSA_OTA_WEB_QUEUE_H
 #define MIFSA_OTA_WEB_QUEUE_H
 
-#include "mifsa/ota/upgrade.h"
+#include "mifsa/ota/types/upgrade.h"
 #include "web_feed.h"
 #include "web_init.h"
 #include <mifsa/base/queue.h>

@@ -15,8 +15,6 @@
 
 #include "mifsa/ota/client_interface.h"
 #include "mifsa/ota/config.h"
-#include "mifsa/ota/detail_message.h"
-#include "mifsa/ota/domain.h"
 #include <mifsa/base/singleton.h>
 #include <mifsa/module/client.hpp>
 

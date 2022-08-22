@@ -10,11 +10,11 @@
  *History:
  **********************************************************************************/
 
-#ifndef MIFSA_CONTROL_MESSAGE_H
-#define MIFSA_CONTROL_MESSAGE_H
+#ifndef MIFSA_OTA_TYPES_CONTROL_MESSAGE_H
+#define MIFSA_OTA_TYPES_CONTROL_MESSAGE_H
 
-#include "mifsa/ota/domain.h"
-#include "mifsa/ota/upgrade.h"
+#include "domain.h"
+#include "upgrade.h"
 #include <mifsa/base/variant.h>
 
 MIFSA_NAMESPACE_BEGIN
@@ -43,4 +43,4 @@ VARIANT_DECLARE_TYPE(Ota::ControlMessage, ota_control_message);
 
 MIFSA_NAMESPACE_END
 
-#endif // MIFSA_CONTROL_MESSAGE_H
+#endif // MIFSA_OTA_TYPES_CONTROL_MESSAGE_H

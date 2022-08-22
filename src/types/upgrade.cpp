@@ -10,7 +10,7 @@
  *History:
  **********************************************************************************/
 
-#include "mifsa/ota/upgrade.h"
+#include "mifsa/ota/types/upgrade.h"
 #include "mifsa/utils/string.h"
 #include <iostream>
 

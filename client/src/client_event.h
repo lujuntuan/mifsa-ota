@@ -13,10 +13,10 @@
 #ifndef MIFSA_CLIENT_EVENT_H
 #define MIFSA_CLIENT_EVENT_H
 
+#include "core/setting.h"
 #include "mifsa/base/event.h"
-#include "mifsa/ota/control_message.h"
-#include "mifsa/ota/detail_message.h"
-#include "mifsa/ota/setting.h"
+#include "mifsa/ota/types/control_message.h"
+#include "mifsa/ota/types/detail_message.h"
 
 MIFSA_NAMESPACE_BEGIN
 
@@ -38,7 +38,7 @@ public:
         RES_DEPLOY_PROGRESS,
     };
     explicit ClientEvent(ClientEventType type, const VariantMap& data = VariantMap()) noexcept
-        : Event(MIFSA_QUEUE_ID_CLIENT, type)
+        : Event(MIFSA_OTA_QUEUE_ID_CLIENT, type)
         , m_data(data)
     {
     }

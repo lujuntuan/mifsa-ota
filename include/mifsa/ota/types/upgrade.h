@@ -10,8 +10,8 @@
  *History:
  **********************************************************************************/
 
-#ifndef MIFSA_OTA_UPGRADE_H
-#define MIFSA_OTA_UPGRADE_H
+#ifndef MIFSA_OTA_TYPES_UPGRADE_H
+#define MIFSA_OTA_TYPES_UPGRADE_H
 
 #include "mifsa/base/define.h"
 #include "mifsa/base/variant.h"
@@ -83,4 +83,4 @@ VARIANT_DECLARE_TYPE(Ota::Upgrade, ota_upgrade);
 
 MIFSA_NAMESPACE_END
 
-#endif // MIFSA_OTA_UPGRADE_H
+#endif // MIFSA_OTA_TYPES_UPGRADE_H

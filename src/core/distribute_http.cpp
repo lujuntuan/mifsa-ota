@@ -10,12 +10,12 @@
  *History:
  **********************************************************************************/
 
-#include "mifsa/ota/setting.h"
-#if (defined(MIFSA_SERVER_TYPE) && defined(MIFSA_USE_DISTRIBUTE_HTTP))
+#include "setting.h"
+#if (defined(MIFSA_OTA_BUILD_SERVER) && defined(MIFSA_OTA_USE_DISTRIBUTE_HTTP))
 #include "config_http.h"
 #include "core.h"
 #include "helper.h"
-#include "importlib/httplib.hpp"
+#include "hpplib/httplib.hpp"
 #include <mifsa/base/elapsed.h>
 #include <mifsa/base/log.h>
 #include <mifsa/utils/dir.h>
@@ -64,7 +64,7 @@ namespace Core {
             bool finished = false;
         };
         std::vector<Helper*> helpers;
-#ifdef MIFSA_USE_HTTPS
+#ifdef MIFSA_OTA_USE_HTTPS
         if (!config.value("web_server_cert_path").isValid() || !config.value("web_server_key_path").isValid()) {
             statusHelper.throwError(304);
             LOG_WARNING("distribute web_server_cert_path or web_server_key_path  is empty");
@@ -88,7 +88,7 @@ namespace Core {
             LOG_WARNING("load server config  error1");
             return statusHelper.status;
         }
-        std::string serverFuncName = std::string("/") + MIFSA_WEB_PULL_FUNC_NAME + "/[^\\s]*";
+        std::string serverFuncName = std::string("/") + MIFSA_OTA_WEB_PULL_FUNC_NAME + "/[^\\s]*";
         server.Get(serverFuncName, [&](const httplib::Request& req, httplib::Response& res) {
             bool hasPull = false;
             const auto& spVector = Utils::stringSplit(req.path, "/");
@@ -104,7 +104,7 @@ namespace Core {
                 feedToServer(res);
                 return;
             }
-            if (spVector[1] != MIFSA_WEB_PULL_FUNC_NAME) {
+            if (spVector[1] != MIFSA_OTA_WEB_PULL_FUNC_NAME) {
                 statusHelper.throwError(308, false);
                 LOG_WARNING("distribute url error");
                 feedToServer(res);
@@ -235,10 +235,10 @@ namespace Core {
                             helper->rfile.read(helper->buffer.data(), size);
                             sink.write(helper->buffer.data(), size);
                             uint64_t current = offset + size;
-#if (MIFSA_WEB_TRANSFER_TEST_TIME)
-                            Utils::sleepMilli(MIFSA_WEB_TRANSFER_TEST_TIME); // sleep_test
+#if (MIFSA_OTA_WEB_TRANSFER_TEST_TIME)
+                            Utils::sleepMilli(MIFSA_OTA_WEB_TRANSFER_TEST_TIME); // sleep_test
 #endif
-                            if (helper->elapsed.get() >= MIFSA_WEB_TRANSFER_INTERVAL_MIN || current >= file.size) {
+                            if (helper->elapsed.get() >= MIFSA_OTA_WEB_TRANSFER_INTERVAL_MIN || current >= file.size) {
                                 if (current >= file.size) {
                                     helper->finished = true;
                                 } else {
@@ -264,7 +264,7 @@ namespace Core {
                                     mutex.lock();
                                     transfers.update(std::move(transfer), true);
                                     mutex.unlock();
-                                    if (transferElapsed.get() > MIFSA_WEB_TRANSFER_INTERVAL && current < file.size) {
+                                    if (transferElapsed.get() > MIFSA_OTA_WEB_TRANSFER_INTERVAL && current < file.size) {
                                         mutex.lock();
                                         transferElapsed.restart();
                                         transfers.sort();

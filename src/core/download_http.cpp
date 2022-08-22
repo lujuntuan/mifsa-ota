@@ -10,12 +10,12 @@
  *History:
  **********************************************************************************/
 
-#include "mifsa/ota/setting.h"
-#if (defined(MIFSA_CLIENT_TYPE) && defined(MIFSA_USE_DOWNLOAD_HTTP)) || (defined(MIFSA_SERVER_TYPE) && defined(MIFSA_USE_PULL_HTTP))
+#include "setting.h"
+#if (defined(MIFSA_OTA_BUILD_CLIENT) && defined(MIFSA_OTA_USE_DOWNLOAD_HTTP)) || (defined(MIFSA_OTA_BUILD_SERVER) && defined(MIFSA_OTA_USE_PULL_HTTP))
 #include "config_http.h"
 #include "core.h"
 #include "helper.h"
-#include "importlib/httplib.hpp"
+#include "hpplib/httplib.hpp"
 #include <mifsa/base/elapsed.h>
 #include <mifsa/base/log.h>
 #include <mifsa/utils/dir.h>
@@ -26,7 +26,7 @@ MIFSA_NAMESPACE_BEGIN
 
 namespace Ota {
 namespace Core {
-#ifdef MIFSA_USE_DOWNLOAD_HTTP
+#ifdef MIFSA_OTA_USE_DOWNLOAD_HTTP
     extern Status httpDownloadCommon(const std::string& dir, const Files& files, const VariantMap& config,
         const BreakFunction& breakFunction,
         const ProgressFunction& progressFunction);
@@ -229,8 +229,8 @@ namespace Core {
                         helper->wCachefile.write(helper->currentSizeStr.data(), helper->currentSizeStr.length());
                         helper->wfile.flush();
                         helper->wCachefile.flush();
-#if (MIFSA_WEB_TRANSFER_TEST_TIME)
-                        Utils::sleepMilli(MIFSA_WEB_TRANSFER_TEST_TIME); // sleep_test
+#if (MIFSA_OTA_WEB_TRANSFER_TEST_TIME)
+                        Utils::sleepMilli(MIFSA_OTA_WEB_TRANSFER_TEST_TIME); // sleep_test
 #endif
                         return true;
                     },
@@ -249,7 +249,7 @@ namespace Core {
                             return false;
                         }
                         if (progressFunction) {
-                            if (helper->elapsed.get() >= MIFSA_WEB_TRANSFER_INTERVAL_MIN || current >= total) {
+                            if (helper->elapsed.get() >= MIFSA_OTA_WEB_TRANSFER_INTERVAL_MIN || current >= total) {
                                 if (total + helper->offsetSize != file.size) {
                                     statusHelper.throwError(113);
                                     LOG_WARNING("download size error", " (" + helper->fileName + ")");
@@ -275,7 +275,7 @@ namespace Core {
                                 mutex.lock();
                                 transfers.update(std::move(transfer), true);
                                 mutex.unlock();
-                                if (transferElapsed.get() > MIFSA_WEB_TRANSFER_INTERVAL && current < total) {
+                                if (transferElapsed.get() > MIFSA_OTA_WEB_TRANSFER_INTERVAL && current < total) {
                                     mutex.lock();
                                     transferElapsed.restart();
                                     transfers.sort();

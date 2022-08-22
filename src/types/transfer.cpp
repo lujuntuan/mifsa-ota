@@ -10,8 +10,8 @@
  *History:
  **********************************************************************************/
 
-#include "mifsa/ota/transfer.h"
-#include "mifsa/ota/upgrade.h"
+#include "mifsa/ota/types/transfer.h"
+#include "mifsa/ota/types/upgrade.h"
 #include "mifsa/utils/string.h"
 #include <algorithm>
 #include <iostream>
