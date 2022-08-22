@@ -10,18 +10,18 @@
  *History:
  **********************************************************************************/
 
-#ifndef MIFSA_OTA_PROVIDER_REALIZE_ROS_H
-#define MIFSA_OTA_PROVIDER_REALIZE_ROS_H
+#ifndef MIFSA_OTA_SERVER_INTERFACE_ROS_H
+#define MIFSA_OTA_SERVER_INTERFACE_ROS_H
 
 #ifdef MIFSA_SUPPORT_ROS
 
-#include "mifsa/ota/provider.h"
-#include <rclcpp/rclcpp.hpp>
+#include "mifsa/ota/server_interface.h"
 #include <mifsa/base/semaphore.h>
 #include <mifsa/base/thread.h>
 #include <mifsa_ota_idl/msg/command.hpp>
 #include <mifsa_ota_idl/msg/location.hpp>
 #include <mifsa_ota_idl/srv/nmea.hpp>
+#include <rclcpp/rclcpp.hpp>
 
 using namespace mifsa_ota_idl;
 
@@ -29,9 +29,9 @@ MIFSA_NAMESPACE_BEGIN
 
 namespace Ota {
 
-class ProviderImplementation : public Provider {
+class ServerInterfaceAdapter : public ServerInterface {
 public:
-    ProviderImplementation()
+    ServerInterfaceAdapter()
     {
         Semaphore sema;
         m_thread.start([&]() {
@@ -71,7 +71,7 @@ public:
         });
         sema.acquire();
     }
-    ~ProviderImplementation()
+    ~ServerInterfaceAdapter()
     {
         rclcpp::shutdown();
         m_thread.stop();
@@ -123,4 +123,4 @@ MIFSA_NAMESPACE_END
 
 #endif
 
-#endif // MIFSA_OTA_PROVIDER_REALIZE_ROS_H
+#endif // MIFSA_OTA_SERVER_INTERFACE_ROS_H

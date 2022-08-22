@@ -10,20 +10,21 @@
  *History:
  **********************************************************************************/
 
-#include <mifsa/ota/platform.h>
+#ifndef MIFSA_OTA_PLATFORM_H
+#define MIFSA_OTA_PLATFORM_H
+
+#include <mifsa/module/platform.hpp>
 
 MIFSA_NAMESPACE_BEGIN
 
 namespace Ota {
-class PlatformLinux : public Platform {
+class PlatformInterface : public PlatformInterfaceBase {
+    MIFSA_PLUGIN_REGISTER("mifsa_ota_platform")
 public:
-    virtual std::string getNmea() override
-    {
-        return "empty";
-    }
+    virtual std::string getNmea() = 0;
 };
-
-MIFSA_CREATE_PLATFORM(PlatformLinux, 1, 0);
 }
 
 MIFSA_NAMESPACE_END
+
+#endif // MIFSA_OTA_PLATFORM_H

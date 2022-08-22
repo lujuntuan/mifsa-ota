@@ -15,7 +15,7 @@
 
 #include "mifsa/ota/config.h"
 #include "mifsa/ota/domain.h"
-#include "mifsa/ota/provider.h"
+#include "mifsa/ota/server_interface.h"
 #include "mifsa/ota/upgrade.h"
 #include <mifsa/base/singleton.h>
 #include <mifsa/module/server.hpp>
@@ -23,7 +23,7 @@
 MIFSA_NAMESPACE_BEGIN
 
 namespace Ota {
-class Server : public ServerProxy<Provider>, public SingletonProxy<Server> {
+class Server : public ServerProxy<ServerInterface>, public SingletonProxy<Server> {
 
 public:
     Server(int argc, char** argv);
@@ -68,7 +68,7 @@ private:
 
 private:
     struct ServerHelper* m_serverHelper = nullptr;
-    friend class ProviderImplementation;
+    friend class ServerInterfaceAdapter;
     friend class WebQueue;
 };
 }
@@ -76,7 +76,5 @@ private:
 MIFSA_NAMESPACE_END
 
 #define mifsa_ota_server Mifsa::Ota::Server::getInstance()
-#define mifsa_ota_provider mifsa_ota_server->provider()
-#define mifsa_ota_platform mifsa_ota_server->platform()
 
 #endif // MIFSA_OTA_SERVER_H

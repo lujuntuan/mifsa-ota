@@ -11,9 +11,9 @@
  **********************************************************************************/
 
 #include "mifsa/ota/client.h"
-#include "adpter/interface_fdbus.hpp"
-#include "adpter/interface_ros.hpp"
-#include "adpter/interface_vsomeip.hpp"
+#include "adapter/client_interface_fdbus.hpp"
+#include "adapter/client_interface_ros.hpp"
+#include "adapter/client_interface_vsomeip.hpp"
 #include "client_event.h"
 #include "core/core.h"
 #include "mifsa/ota/setting.h"
@@ -84,7 +84,7 @@ Client::Client(int argc, char** argv)
     m_hpr->detail.domain.state = WR_IDLE;
     m_hpr->detail.domain.last = WR_OFFLINE;
     //
-    loadInterface<InterfaceImplementation>();
+    loadInterface<ClientInterfaceAdapter>();
 }
 
 Client::~Client()
@@ -278,20 +278,20 @@ void Client::eventChanged(const std::shared_ptr<Event>& event)
             LOG_WARNING("get ClientControlEvent error");
             break;
         }
-        m_hpr->control = controlEvent->control();
-        m_hpr->upgrade = controlEvent->upgrade();
+        m_hpr->control = controlEvent->controlMessage().control;
+        m_hpr->upgrade = controlEvent->controlMessage().upgrade;
         m_hpr->detail.domain.name = m_hpr->name;
         m_hpr->detail.domain.guid = m_hpr->guid;
         m_hpr->detail.domain.version = m_hpr->version;
         m_hpr->detail.domain.attribute = m_hpr->attribute;
         m_hpr->detail.domain.meta = m_hpr->meta;
-        for (const auto& packge : controlEvent->upgrade().packages) {
+        for (const auto& packge : controlEvent->controlMessage().upgrade.packages) {
             if (m_hpr->detail.domain.name == packge.domain) {
                 m_hpr->detail.package = packge;
                 break;
             }
         }
-        switch (controlEvent->control()) {
+        switch (controlEvent->controlMessage().control) {
         case CTL_UNKNOWN: {
             LOG_WARNING("unknown control");
             break;
@@ -335,7 +335,7 @@ void Client::eventChanged(const std::shared_ptr<Event>& event)
             if (m_hpr->detail.domain.state == WR_IDLE) {
                 setDomainState(WR_WAIT);
             }
-            if (m_hpr->detail.hasDepends(controlEvent->depends())) {
+            if (m_hpr->detail.hasDepends(controlEvent->controlMessage().depends)) {
                 break;
             }
             m_hpr->detail.domain.error = 0;
@@ -543,17 +543,17 @@ bool Client::hasSubscibeDetail() const
     return false;
 }
 
-void Client::processControlMessage(Control control, Upgrade&& upgrade, Depends&& depends)
+void Client::processControlMessage(ControlMessage&& controlMessage)
 {
-    this->postEvent(std::make_shared<ClientControlEvent>(control, upgrade, depends));
+    this->postEvent(std::make_shared<ClientControlEvent>(std::move(controlMessage)));
 }
 
-void Client::processDetailMessage(const DetailMessage& detailMessage)
+void Client::processDetailMessage(DetailMessage&& detailMessage)
 {
     if (!m_hpr->detailFunction) {
         return;
     }
-    this->postEvent(std::make_shared<ClientDetailEvent>(detailMessage));
+    this->postEvent(std::make_shared<ClientDetailEvent>(std::move(detailMessage)));
 }
 
 bool Client::checkControlMessageId(uint32_t id) const

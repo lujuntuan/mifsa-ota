@@ -10,27 +10,27 @@
  *History:
  **********************************************************************************/
 
-#ifndef MIFSA_OTA_INTERFACE_H
-#define MIFSA_OTA_INTERFACE_H
+#ifndef MIFSA_OTA_CLIENT_INTERFACE_H
+#define MIFSA_OTA_CLIENT_INTERFACE_H
 
 #include "control_message.h"
 #include "detail_message.h"
 #include "domain_message.h"
-#include <mifsa/module/interface.hpp>
+#include <mifsa/module/client.hpp>
 
 MIFSA_NAMESPACE_BEGIN
 
 namespace Ota {
-class Interface : public InterfaceBase {
+class ClientInterface : public ClientInterfaceBase {
 public:
-    using CbSendControlMessage = std::function<void(const ControlMessage& controlMessage)>;
-    using CbSendDetailMessage = std::function<void(const DetailMessage& detailMessage)>;
-    virtual void setCbControlMessage(CbSendControlMessage cb) = 0;
-    virtual void setCbDetailMessage(CbSendDetailMessage cb) = 0;
+    using CbControlMessage = std::function<void(const ControlMessage& controlMessage)>;
+    using CbDetailMessage = std::function<void(const DetailMessage& detailMessage)>;
+    virtual void setCbControlMessage(CbControlMessage cb) = 0;
+    virtual void setCbDetailMessage(CbDetailMessage cb) = 0;
     virtual bool sendDomain(const DomainMessage& domainMessage) = 0;
 };
 }
 
 MIFSA_NAMESPACE_END
 
-#endif // MIFSA_OTA_INTERFACE_H
+#endif // MIFSA_OTA_CLIENT_INTERFACE_H

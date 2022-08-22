@@ -14,7 +14,6 @@
 #define MIFSA_OTA_DOMAIN_MESSAGE_H
 
 #include "mifsa/ota/domain.h"
-#include "mifsa/ota/upgrade.h"
 #include <mifsa/base/variant.h>
 
 MIFSA_NAMESPACE_BEGIN

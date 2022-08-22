@@ -10,17 +10,17 @@
  *History:
  **********************************************************************************/
 
-#ifndef MIFSA_OTA_INTERFACE_REALIZE_ROS_H
-#define MIFSA_OTA_INTERFACE_REALIZE_ROS_H
+#ifndef MIFSA_OTA_CLIENT_INTERFACE_ROS_H
+#define MIFSA_OTA_CLIENT_INTERFACE_ROS_H
 
 #ifdef MIFSA_SUPPORT_ROS
 
-#include "mifsa/ota/interface.h"
-#include <rclcpp/rclcpp.hpp>
+#include "mifsa/ota/client.h"
 #include <mifsa/base/thread.h>
 #include <mifsa_ota_idl/msg/command.hpp>
 #include <mifsa_ota_idl/msg/location.hpp>
 #include <mifsa_ota_idl/srv/nmea.hpp>
+#include <rclcpp/rclcpp.hpp>
 
 using namespace mifsa_ota_idl;
 
@@ -30,9 +30,9 @@ int _time_out = 5000;
 
 namespace Ota {
 
-class InterfaceImplementation : public Interface {
+class ClientInterfaceAdapter : public ClientInterface {
 public:
-    InterfaceImplementation()
+    ClientInterfaceAdapter()
     {
         Semaphore sema;
         m_thread.start([&]() {
@@ -76,7 +76,7 @@ public:
         });
         sema.acquire();
     }
-    ~InterfaceImplementation()
+    ~ClientInterfaceAdapter()
     {
         rclcpp::shutdown();
         m_thread.stop();
@@ -135,4 +135,4 @@ MIFSA_NAMESPACE_END
 
 #endif
 
-#endif // MIFSA_OTA_INTERFACE_REALIZE_ROS_H
+#endif // MIFSA_OTA_CLIENT_INTERFACE_ROS_H

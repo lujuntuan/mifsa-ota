@@ -44,10 +44,10 @@ add_custom_target(
 
 add_subdirectory(idls)
 add_subdirectory(server)
-#add_subdirectory(client)
+add_subdirectory(client)
 
 if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/platforms)
-    add_subdirectory(platforms)
+    #add_subdirectory(platforms)
 endif()
 
 if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/c)

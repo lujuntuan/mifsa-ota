@@ -10,26 +10,26 @@
  *History:
  **********************************************************************************/
 
-#ifndef MIFSA_OTA_PROVIDER_H
-#define MIFSA_OTA_PROVIDER_H
+#ifndef MIFSA_SERVER_OTA_INTERFACE_H
+#define MIFSA_SERVER_OTA_INTERFACE_H
 
 #include "control_message.h"
 #include "detail_message.h"
 #include "domain_message.h"
-#include <mifsa/module/provider.hpp>
+#include <mifsa/module/server.hpp>
 
 MIFSA_NAMESPACE_BEGIN
 
 namespace Ota {
-class Provider : public ProviderBase {
+class ServerInterface : public ServerInterfaceBase {
 public:
-    using CbReportDomain = std::function<void(const DomainMessage& domainMessage)>;
+    using CbDomain = std::function<void(const DomainMessage& domainMessage)>;
     virtual void sendControlMessage(const ControlMessage& controlMessage) = 0;
     virtual void sendDetailMessage(const DetailMessage& detailMessage) = 0;
-    virtual void setCbReportDomain(const CbReportDomain& cb) = 0;
+    virtual void setCbReportDomain(const CbDomain& cb) = 0;
 };
 }
 
 MIFSA_NAMESPACE_END
 
-#endif // MIFSA_OTA_PROVIDER_H
+#endif // MIFSA_SERVER_OTA_INTERFACE_H

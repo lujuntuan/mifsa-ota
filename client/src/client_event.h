@@ -14,10 +14,9 @@
 #define MIFSA_CLIENT_EVENT_H
 
 #include "mifsa/base/event.h"
+#include "mifsa/ota/control_message.h"
 #include "mifsa/ota/detail_message.h"
-#include "mifsa/ota/domain.h"
 #include "mifsa/ota/setting.h"
-#include "mifsa/ota/upgrade.h"
 
 MIFSA_NAMESPACE_BEGIN
 
@@ -54,39 +53,27 @@ private:
 
 class ClientControlEvent : public ClientEvent {
 public:
-    template <typename T1, typename T2>
-    explicit ClientControlEvent(Control control, T1&& upgrade, T2&& depends) noexcept
+    template <typename T>
+    explicit ClientControlEvent(T&& controlMessage) noexcept
         : ClientEvent(REQ_CONTROL)
-        , m_control(control)
-        , m_upgrade(std::forward<T1>(upgrade))
-        , m_depends(std::forward<T2>(depends))
+        , m_controlMessage(controlMessage)
     {
     }
-    inline Control control() const noexcept
+    inline ControlMessage controlMessage() const noexcept
     {
-        return m_control;
-    }
-    inline const Upgrade& upgrade() const noexcept
-    {
-        return m_upgrade;
-    }
-    inline const Depends& depends() const noexcept
-    {
-        return m_depends;
+        return m_controlMessage;
     }
 
 private:
-    Control m_control;
-    Upgrade m_upgrade;
-    Depends m_depends;
+    ControlMessage m_controlMessage;
 };
 
 class ClientDetailEvent : public ClientEvent {
 public:
     template <typename T>
-    explicit ClientDetailEvent(T&& detail) noexcept
+    explicit ClientDetailEvent(T&& detailMessage) noexcept
         : ClientEvent(REQ_DETAIL)
-        , m_detailMessage(std::forward<T>(detail))
+        , m_detailMessage(std::forward<T>(detailMessage))
     {
     }
     inline const DetailMessage& detailMessage() const noexcept

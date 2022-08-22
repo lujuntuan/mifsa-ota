@@ -11,9 +11,9 @@
  **********************************************************************************/
 
 #include "server.h"
-#include "adpter/provider_fdbus.hpp"
-#include "adpter/provider_ros.hpp"
-//#include "adpter/provider_vsomeip.hpp"
+#include "adapter/server_interface_fdbus.hpp"
+#include "adapter/server_interface_ros.hpp"
+#include "adapter/server_interface_vsomeip.hpp"
 #include "hawkbit_queue.h"
 #include "server_event.h"
 #include "web_event.h"
@@ -88,7 +88,7 @@ Server::Server(int argc, char** argv)
         std::exit(0);
     }
     MIFSA_HELPER_CREATE(m_hpr);
-    m_hpr->domainsConfig = readConfig("/etc/dcus_domains.conf");
+    m_hpr->domainsConfig = readConfig("mifsa_ota_domains.json");
     static std::mutex mutex;
     setMutex(mutex);
     m_hpr->webQueue.setMutex(mutex);
@@ -105,8 +105,8 @@ Server::Server(int argc, char** argv)
     m_hpr->webQueue.postEvent(std::make_shared<WebInitEvent>(webInit));
     m_hpr->webQueue.asyncRun();
     //
-    loadProvider<ProviderImplementation>();
-    provider()->setCbReportDomain([this](const DomainMessage& domainMessage) {
+    loadInterface<ServerInterfaceAdapter>();
+    interface()->setCbReportDomain([this](const DomainMessage& domainMessage) {
         processDomainMessage(domainMessage);
     });
 }
@@ -208,7 +208,7 @@ void Server::begin()
     if (!Utils::exists(cacheDir)) {
         Utils::mkPath(cacheDir);
     }
-    m_hpr->statusFilePath = cacheDir + "/dcus_status.json";
+    m_hpr->statusFilePath = cacheDir + "/mifsa_ota_status.json";
     if (!Utils::exists(m_hpr->statusFilePath)) {
         m_hpr->firstStart = true;
     }
@@ -483,7 +483,7 @@ void Server::eventChanged(const std::shared_ptr<Event>& event)
 std::vector<std::string> Server::getWebFeedDetails() const
 {
     std::vector<std::string> details;
-    details.push_back("DCus Message:");
+    details.push_back("Mifsa-OTA Message:");
     details.push_back(Utils::stringSprintf("[server] state: %s, last: %s, control: %s, error: %s, step: %s, progress: %s, message: %s",
         Domain::getMrStateStr(m_hpr->state),
         Domain::getMrStateStr(m_hpr->lastState),
@@ -917,7 +917,7 @@ void Server::sendControlMessage(Control control, bool cache)
         }
     }
     ControlMessage controlMessage(m_hpr->controlMessageId, control, upgrade(), depends());
-    provider()->sendControlMessage(controlMessage);
+    interface()->sendControlMessage(controlMessage);
     // onSendControlMessage(m_hpr->controlMessageId);
 }
 
@@ -930,7 +930,7 @@ void Server::sendDetailMessage(bool cache)
         }
     }
     DetailMessage detailMessage(m_hpr->controlMessageId, state(), lastState(), isActive(), errorCode(), step(), progress(), message(), details());
-    provider()->sendDetailMessage(detailMessage);
+    interface()->sendDetailMessage(detailMessage);
     // onSendDetailMessage(m_hpr->detailMessageId);
 }
 
@@ -983,13 +983,13 @@ void Server::processDomains()
             return;
         }
     } else if (m_hpr->state == MR_DOWNLOAD_ASK || m_hpr->state == MR_DEPLOY_ASK || m_hpr->state == MR_CANCEL_ASK || m_hpr->state == MR_RESUME_ASK) {
-        //        if (m_hpr->stateElapsed.get() > DCUS_MAX_ASK_TIME) {
+        //        if (m_hpr->stateElapsed.get() > MIFSA_MAX_ASK_TIME) {
         //            LOG_WARNING("ask time out");
         //            feedback(false, 1911);
         //            return;
         //        }
     } else if (m_hpr->state == MR_DONE_ASK || m_hpr->state == MR_ERROR_ASK) {
-        //        if (m_hpr->stateElapsed.get() > DCUS_MAX_ASK_TIME) {
+        //        if (m_hpr->stateElapsed.get() > MIFSA_MAX_ASK_TIME) {
         //            LOG_WARNING("ask time out");
         //            feedback(false, 1912);
         //            return;

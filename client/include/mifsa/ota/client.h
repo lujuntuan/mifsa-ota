@@ -13,17 +13,17 @@
 #ifndef MIFSA_OTA_CLIENT_H
 #define MIFSA_OTA_CLIENT_H
 
+#include "mifsa/ota/client_interface.h"
 #include "mifsa/ota/config.h"
 #include "mifsa/ota/detail_message.h"
 #include "mifsa/ota/domain.h"
-#include "mifsa/ota/interface.h"
 #include <mifsa/base/singleton.h>
 #include <mifsa/module/client.hpp>
 
 MIFSA_NAMESPACE_BEGIN
 
 namespace Ota {
-class MIFSA_EXPORT Client : public ClientProxy<Interface>, public SingletonProxy<Client> {
+class MIFSA_EXPORT Client : public ClientProxy<ClientInterface>, public SingletonProxy<Client> {
 public:
     using FilePaths = std::vector<std::string>;
     using DeployFunction = std::function<void(const std::string& dir, const FilePaths& filePaths)>;
@@ -67,8 +67,8 @@ private:
     bool hasSubscibeDeploy() const;
     bool hasSubscibeDetail() const;
     void sendHeartbeat();
-    void processControlMessage(Control control, Upgrade&& upgrade, Depends&& depends);
-    void processDetailMessage(const DetailMessage& detailMessage);
+    void processControlMessage(ControlMessage&& controlMessage);
+    void processDetailMessage(DetailMessage&& detailMessage);
     bool checkControlMessageId(uint32_t id) const;
     bool checkDetailMessageId(uint32_t id) const;
     void setDomainState(ClientState state);
@@ -82,7 +82,7 @@ private:
     void deploy(const std::string& id, const Files& files);
 
 private:
-    friend class InterfaceImplementation;
+    friend class ClientInterfaceAdapter;
     struct ClientHelper* m_clientHelper = nullptr;
 };
 }
@@ -90,6 +90,5 @@ private:
 MIFSA_NAMESPACE_END
 
 #define mifsa_ota_client Mifsa::Ota::Client::getInstance()
-#define mifsa_ota_interface mifsa_ota_client->interface()
 
 #endif // MIFSA_OTA_CLIENT_H

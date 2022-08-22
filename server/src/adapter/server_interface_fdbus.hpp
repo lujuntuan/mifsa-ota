@@ -10,8 +10,8 @@
  *History:
  **********************************************************************************/
 
-#ifndef MIFSA_OTA_PROVIDER_REALIZE_FDBUS_H
-#define MIFSA_OTA_PROVIDER_REALIZE_FDBUS_H
+#ifndef MIFSA_OTA_SERVER_INTERFACE_FDBUS_H
+#define MIFSA_OTA_SERVER_INTERFACE_FDBUS_H
 
 #ifdef MIFSA_SUPPORT_FDBUS
 
@@ -33,7 +33,7 @@ using namespace ipc::fdbus;
 #endif
 
 #include "mifsa/ota/idl/fdbus/ota.pb.h"
-#include "mifsa/ota/provider.h"
+#include "server.h"
 #include <mifsa/base/thread.h>
 
 MIFSA_NAMESPACE_BEGIN
@@ -139,32 +139,48 @@ static DomainMessage _getDomainMessage(const mifsa::ota::pb::DomainMessage& pb_d
     return DomainMessage(std::move(domain), discovery);
 }
 
-class FdbusServer : public CBaseServer {
+class ServerInterfaceAdapter : public ServerInterface, protected CBaseServer {
 public:
-    FdbusServer()
-        : CBaseServer("mifsa_ota_client", &worker)
+    ServerInterfaceAdapter()
+        : CBaseServer("mifsa_ota_client", &m_worker)
     {
-        worker.start();
+        FDB_CONTEXT->start();
+        m_worker.start();
+        CBaseServer::bind("svc://mifsa_ota");
     }
-    ~FdbusServer()
+    ~ServerInterfaceAdapter()
     {
-        worker.flush();
-        worker.exit();
-        unbind();
-        disconnect();
+        m_worker.flush();
+        m_worker.exit();
+        CBaseServer::unbind();
+        CBaseServer::disconnect();
     }
+    void sendControlMessage(const ControlMessage& controlMessage) override
+    {
+        const auto& pb_controlMessage = _getControlMessage(controlMessage);
+        CFdbProtoMsgBuilder builder(pb_controlMessage);
+        CBaseServer::broadcast(mifsa::ota::pb::TP_CONTROL_MSG, builder);
+    }
+    void sendDetailMessage(const DetailMessage& detailMessage) override
+    {
+        const auto& pb_detailMessage = _getDetailMessage(detailMessage);
+        CFdbProtoMsgBuilder builder(pb_detailMessage);
+        CBaseServer::broadcast(mifsa::ota::pb::TP_DETAIL_MSG, builder);
+    }
+    void setCbReportDomain(const CbDomain& cb) override
+    {
+        m_cbDomain = cb;
+    }
+
+protected:
     void onOnline(FDBUS_ONLINE_ARG_TYPE) override
     {
-        LOG_DEBUG("onOnline!");
     }
     void onOffline(FDBUS_ONLINE_ARG_TYPE) override
     {
-        LOG_DEBUG("onOffline!");
     }
     void onSubscribe(CBaseJob::Ptr& msg_ref) override
     {
-        auto msg = castToMessage<CBaseMessage*>(msg_ref);
-        (void)msg;
     }
     void onInvoke(CBaseJob::Ptr& msg_ref) override
     {
@@ -178,42 +194,15 @@ public:
                     return;
                 }
             }
-            cbReportDomain(_getDomainMessage(pb_domainMessage));
+            if (m_cbDomain) {
+                m_cbDomain(_getDomainMessage(pb_domainMessage));
+            }
         }
     }
 
-public:
-    CBaseWorker worker;
-    Provider::CbReportDomain cbReportDomain;
-};
-
-class ProviderImplementation : public Provider {
-public:
-    ProviderImplementation()
-    {
-        FDB_CONTEXT->start();
-        m_server = std::make_unique<FdbusServer>();
-        m_server->bind("svc://mifsa_ota");
-    }
-    void sendControlMessage(const ControlMessage& controlMessage)
-    {
-        const auto& pb_controlMessage = _getControlMessage(controlMessage);
-        CFdbProtoMsgBuilder builder(pb_controlMessage);
-        m_server->broadcast(mifsa::ota::pb::TP_CONTROL_MSG, builder);
-    }
-    void sendDetailMessage(const DetailMessage& detailMessage)
-    {
-        const auto& pb_detailMessage = _getDetailMessage(detailMessage);
-        CFdbProtoMsgBuilder builder(pb_detailMessage);
-        m_server->broadcast(mifsa::ota::pb::TP_DETAIL_MSG, builder);
-    }
-    void setCbReportDomain(const CbReportDomain& cb)
-    {
-        m_server->cbReportDomain = cb;
-    }
-
 private:
-    std::unique_ptr<FdbusServer> m_server;
+    CBaseWorker m_worker;
+    CbDomain m_cbDomain;
 };
 
 }
@@ -222,4 +211,4 @@ MIFSA_NAMESPACE_END
 
 #endif
 
-#endif // MIFSA_OTA_PROVIDER_REALIZE_FDBUS_H
+#endif // MIFSA_OTA_SERVER_INTERFACE_FDBUS_H

@@ -10,8 +10,8 @@
  *History:
  **********************************************************************************/
 
-#ifndef MIFSA_OTA_INTERFACE_REALIZE_FDBUS_H
-#define MIFSA_OTA_INTERFACE_REALIZE_FDBUS_H
+#ifndef MIFSA_OTA_CLIENT_INTERFACE_FDBUS_H
+#define MIFSA_OTA_CLIENT_INTERFACE_FDBUS_H
 
 #ifdef MIFSA_SUPPORT_FDBUS
 
@@ -34,7 +34,7 @@ using namespace ipc::fdbus;
 
 #include "mifsa/ota/client.h"
 #include "mifsa/ota/idl/fdbus/ota.pb.h"
-#include "mifsa/ota/interface.h"
+
 MIFSA_NAMESPACE_BEGIN
 
 int _time_out = 5000;
@@ -148,82 +148,24 @@ static mifsa::ota::pb::DomainMessage _getDomainMessage(const DomainMessage& doma
     pb_domainMessage.mutable_domain()->set_progress(domainMessage.domain.progress);
     pb_domainMessage.mutable_domain()->set_message(domainMessage.domain.message);
     pb_domainMessage.mutable_domain()->set_answer((mifsa::ota::pb::Domain_Answer)domainMessage.domain.answer);
+    pb_domainMessage.set_discovery(domainMessage.discovery);
     return pb_domainMessage;
 }
 
-class FdbusClient : public CBaseClient {
+class ClientInterfaceAdapter : public ClientInterface, protected CBaseClient {
 public:
-    FdbusClient()
-        : CBaseClient("mifsa_ota_client", &worker)
-    {
-        worker.start();
-    }
-    ~FdbusClient()
-    {
-        worker.flush();
-        worker.exit();
-        disconnect();
-    }
-    void onOnline(FDBUS_ONLINE_ARG_TYPE) override
-    {
-        LOG_DEBUG("onOnline!");
-        CFdbMsgSubscribeList subList;
-        addNotifyItem(subList, mifsa::ota::pb::TP_CONTROL_MSG);
-        if (mifsa_ota_client->hasSubscibeDetail()) {
-            addNotifyItem(subList, mifsa::ota::pb::TP_DETAIL_MSG);
-        }
-        subscribe(subList);
-        m_sid = sid;
-    }
-    void onOffline(FDBUS_ONLINE_ARG_TYPE) override
-    {
-        LOG_DEBUG("onOffline!");
-        cbConnected(false);
-    }
-    void onBroadcast(CBaseJob::Ptr& msg_ref) override
-    {
-        auto msg = castToMessage<CBaseMessage*>(msg_ref);
-        if (msg->code() == mifsa::ota::pb::MSG_LOCATION) {
-            if (!cbLocation) {
-                return;
-            }
-            mifsa::ota::pb::Location pb_location;
-            if (msg->getPayloadSize() > 0) {
-                CFdbProtoMsgParser parser(pb_location);
-                if (!msg->deserialize(parser)) {
-                    LOG_WARNING("deserialize msg error");
-                    return;
-                }
-            }
-            Location location;
-            location.size = (int)pb_location.size();
-            location.flags = pb_location.flags();
-            location.latitude = pb_location.latitude();
-            location.longitude = pb_location.longitude();
-            location.altitude = pb_location.altitude();
-            location.speed = pb_location.speed();
-            location.bearing = pb_location.bearing();
-            location.accuracy = pb_location.accuracy();
-            location.timestamp = pb_location.timestamp();
-            location.data = pb_location.data();
-            cbLocation(location);
-        }
-    }
-
-public:
-    CBaseWorker worker;
-    CbConnected cbConnected;
-    CbLocation cbLocation;
-};
-
-class InterfaceImplementation : public Interface {
-public:
-    InterfaceImplementation()
+    ClientInterfaceAdapter()
+        : CBaseClient("mifsa_ota_client", &m_worker)
     {
         FDB_CONTEXT->start();
-        m_client = std::make_unique<FdbusClient>();
-        m_client->cbConnected = _cbConnected;
-        m_client->connect("svc://mifsa_ota");
+        m_worker.start();
+        CBaseClient::connect("svc://mifsa_ota");
+    }
+    ~ClientInterfaceAdapter()
+    {
+        m_worker.flush();
+        m_worker.exit();
+        CBaseClient::disconnect();
     }
     virtual std::string version() override
     {
@@ -231,46 +173,70 @@ public:
     }
     virtual bool connected() override
     {
-        return m_client->connected();
+        return CBaseClient::connected();
     }
-    virtual std::string getNmea() override
+    virtual void setCbControlMessage(CbControlMessage cb) override
     {
-        std::string nmea;
-        mifsa::ota::pb::Command pb_command;
-        pb_command.set_type(mifsa::ota::pb::Command_Type_QUERY_NMEA);
-        CFdbProtoMsgBuilder builder(pb_command);
-        CBaseJob::Ptr msg_ref(new CBaseMessage(mifsa::ota::pb::MSG_COMMAND));
-        m_client->invoke(msg_ref, builder, _time_out);
-        auto msg = castToMessage<CBaseMessage*>(msg_ref);
-        mifsa::ota::pb::Nmea pb_nmea;
-        if (msg->getPayloadSize() > 0) {
-            CFdbProtoMsgParser parser(pb_nmea);
-            if (!msg->deserialize(parser)) {
-                LOG_WARNING("deserialize msg error");
-                return nmea;
-            }
+        m_cbControlMessage = cb;
+    }
+    virtual void setCbDetailMessage(CbDetailMessage cb) override
+    {
+        m_cbDetailMessage = cb;
+    }
+    virtual bool sendDomain(const DomainMessage& domainMessage) override
+    {
+        mifsa::ota::pb::DomainMessage pb_domainMessage = _getDomainMessage(domainMessage);
+        CFdbProtoMsgBuilder builder(pb_domainMessage);
+        return invoke(mifsa::ota::pb::TP_DOMAIN_MSG, builder);
+    }
+
+protected:
+    void onOnline(FDBUS_ONLINE_ARG_TYPE) override
+    {
+        CFdbMsgSubscribeList subList;
+        CBaseClient::addNotifyItem(subList, mifsa::ota::pb::TP_CONTROL_MSG);
+        if (mifsa_ota_client->hasSubscibeDetail()) {
+            CBaseClient::addNotifyItem(subList, mifsa::ota::pb::TP_DETAIL_MSG);
         }
-        nmea = pb_nmea.data();
-        return nmea;
+        CBaseClient::subscribe(subList);
     }
-    virtual void startNavigation(const CbLocation& cb) override
+    void onOffline(FDBUS_ONLINE_ARG_TYPE) override
     {
-        m_client->cbLocation = cb;
-        mifsa::ota::pb::Command pb_command;
-        pb_command.set_type(mifsa::ota::pb::Command_Type_START_NAVIGATION);
-        CFdbProtoMsgBuilder builder(pb_command);
-        m_client->invoke(mifsa::ota::pb::MSG_COMMAND, builder, _time_out);
+        _cbConnected(false);
     }
-    virtual void stopNavigation() override
+    void onBroadcast(CBaseJob::Ptr& msg_ref) override
     {
-        mifsa::ota::pb::Command pb_command;
-        pb_command.set_type(mifsa::ota::pb::Command_Type_STOP_NAVIGATION);
-        CFdbProtoMsgBuilder builder(pb_command);
-        m_client->invoke(mifsa::ota::pb::MSG_COMMAND, builder, _time_out);
+        CFdbMessage* msgData = castToMessage<CBaseMessage*>(msg_ref);
+        if (!msgData) {
+            return;
+        }
+        if (msgData->code() == mifsa::ota::pb::TP_CONTROL_MSG) {
+            mifsa::ota::pb::ControlMessage pb_controlMessage;
+            if (msgData->getPayloadSize() > 0) {
+                CFdbProtoMsgParser parser(pb_controlMessage);
+                if (!msgData->deserialize(parser)) {
+                    LOG_WARNING("deserialize msg error");
+                    return;
+                }
+            }
+            mifsa_ota_client->processControlMessage(_getControlMessage(pb_controlMessage));
+        } else if (msgData->code() == mifsa::ota::pb::TP_DETAIL_MSG) {
+            mifsa::ota::pb::DetailMessage pb_detailMessage;
+            if (msgData->getPayloadSize() > 0) {
+                CFdbProtoMsgParser parser(pb_detailMessage);
+                if (!msgData->deserialize(parser)) {
+                    LOG_WARNING("deserialize msg error");
+                    return;
+                }
+            }
+            mifsa_ota_client->processDetailMessage(_getDetailMessage(pb_detailMessage));
+        }
     }
 
 private:
-    std::unique_ptr<FdbusClient> m_client;
+    CBaseWorker m_worker;
+    CbControlMessage m_cbControlMessage;
+    CbDetailMessage m_cbDetailMessage;
 };
 
 }
@@ -279,4 +245,4 @@ MIFSA_NAMESPACE_END
 
 #endif
 
-#endif // MIFSA_OTA_INTERFACE_REALIZE_FDBUS_H
+#endif // MIFSA_OTA_CLIENT_INTERFACE_FDBUS_H
