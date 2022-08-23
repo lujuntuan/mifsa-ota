@@ -194,7 +194,7 @@ public:
         if (!ClientInterfaceAdapter::connected()) {
             return false;
         }
-        mifsa_ota_idl::DomainMessage t_domainMessage = _getDomainMessage(domainMessage);
+        const auto& t_domainMessage = _getDomainMessage(domainMessage);
         CFdbProtoMsgBuilder builder(t_domainMessage);
         CBaseClient::invoke(mifsa_ota_idl::TP_DOMAIN_MSG, builder);
         return true;
@@ -230,7 +230,7 @@ protected:
                     return;
                 }
             }
-            if (checkControlMessageId && !checkControlMessageId(t_controlMessage.id())) {
+            if (checkControlMessageId && checkControlMessageId(t_controlMessage.id())) {
                 return;
             }
             const auto& controlMessage = _getControlMessage(t_controlMessage);
@@ -247,7 +247,7 @@ protected:
                     return;
                 }
             }
-            if (checkDetailMessageId && !checkDetailMessageId(t_detailMessage.id())) {
+            if (checkDetailMessageId && checkDetailMessageId(t_detailMessage.id())) {
                 return;
             }
             const auto& detailMessage = _getDetailMessage(t_detailMessage);

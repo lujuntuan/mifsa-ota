@@ -10,16 +10,8 @@
 #  *History:
 #**********************************************************************************
 
-project(examples)
+if(NOT mifsa_base_FOUND)
+    find_package(mifsa_base REQUIRED)
+endif()
 
-if (TARGET mifsa_${MIFSA_MODULE_TYPE})
-    add_subdirectory(sample)
-    find_package(QT NAMES Qt6 Qt5 QUIET)
-    find_package(Qt${QT_VERSION_MAJOR} QUIET COMPONENTS Widgets)
-    if(Qt${QT_VERSION_MAJOR}Widgets_FOUND)
-        add_subdirectory(viewer)
-    endif()
-endif()
-if (TARGET mifsa_${MIFSA_MODULE_TYPE}_c)
-    add_subdirectory(sample_c)
-endif()
+include(${CMAKE_CURRENT_LIST_DIR}/@PROJECT_NAME@-targets.cmake)

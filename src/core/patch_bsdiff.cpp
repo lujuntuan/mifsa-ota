@@ -11,7 +11,7 @@
  **********************************************************************************/
 
 #include "setting.h"
-#if (defined(MIFSA_OTA_BUILD_CLIENT) && defined(MIFSA_OTA_USE_PATCH_BSDIFF))
+#if (defined(MIFSA_OTA_BUILD_CLIENT) && defined(MIFSA_OTA_ENABLE_PATCH_BSDIFF))
 #include "core.h"
 #include "helper.h"
 #include "hpplib/httplib.hpp"

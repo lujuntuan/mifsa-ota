@@ -31,15 +31,24 @@ install(
     )
 
 if(LINUX)
+    file(GLOB_RECURSE
+        SAMPLE_SCRIPTS
+        ${PROJECT_SOURCE_DIR}/*.sh
+        )
+    add_custom_target(
+        ${PROJECT_NAME}_scripts
+        SOURCES
+        ${SAMPLE_SCRIPTS}
+        )
     add_custom_command(
         TARGET
         ${PROJECT_NAME}
         POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/*.sh ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+        COMMAND ${CMAKE_COMMAND} -E copy ${SAMPLE_SCRIPTS} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
         )
     install(
         FILES
-        ${PROJECT_SOURCE_DIR}/*.sh
+        ${SAMPLE_SCRIPTS}
         DESTINATION
         share/${CMAKE_INSTALL_BINDIR}
         )

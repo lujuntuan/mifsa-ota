@@ -24,6 +24,6 @@
 #cmakedefine MIFSA_OTA_BUILD_SERVER
 #cmakedefine MIFSA_OTA_BUILD_CLIENT
 
-#cmakedefine MIFSA_OTA_USE_HTTPS
+#cmakedefine MIFSA_OTA_ENABLE_HTTPS
 
 #endif // MIFSA_OTA_CONFIG_H

@@ -17,22 +17,22 @@
 #include <CommonAPI/CommonAPI.hpp>
 #include <mifsa/utils/dir.h>
 #include <mifsa/utils/host.h>
-#include <v1/commonapi/mifsa_ota_idlStubDefault.hpp>
+#include <v1/mifsa_ota_idl/CommonStubDefault.hpp>
 
-using namespace v1_0::commonapi;
+using namespace v1_0;
 
 MIFSA_NAMESPACE_BEGIN
 namespace Ota {
-static mifsa_ota_idl::Package _getPackage(const Package& package)
+static mifsa_ota_idl::Common::Package _getPackage(const Package& package)
 {
-    mifsa_ota_idl::Package t_package;
+    mifsa_ota_idl::Common::Package t_package;
     t_package.setDomain(package.domain);
     t_package.setPart(package.part);
     t_package.setVersion_(package.version);
     t_package.setMeta(package.meta.toJson());
-    mifsa_ota_idl::Files t_files;
+    mifsa_ota_idl::Common::Files t_files;
     for (const auto& file : package.files) {
-        mifsa_ota_idl::File t_file;
+        mifsa_ota_idl::Common::File t_file;
         t_file.setDomain(file.domain);
         t_file.setName(file.name);
         t_file.setUrl(file.url);
@@ -46,26 +46,26 @@ static mifsa_ota_idl::Package _getPackage(const Package& package)
     return t_package;
 }
 
-static mifsa_ota_idl::ControlMessage _getControlMessage(const ControlMessage& controlMessage)
+static mifsa_ota_idl::Common::ControlMessage _getControlMessage(const ControlMessage& controlMessage)
 {
-    mifsa_ota_idl::ControlMessage t_controlMessage;
+    mifsa_ota_idl::Common::ControlMessage t_controlMessage;
     t_controlMessage.setId(controlMessage.id);
-    t_controlMessage.setControl((mifsa_ota_idl::Control::Literal)controlMessage.control);
-    mifsa_ota_idl::Upgrade t_upgrade;
+    t_controlMessage.setControl((mifsa_ota_idl::Common::Control::Literal)controlMessage.control);
+    mifsa_ota_idl::Common::Upgrade t_upgrade;
     t_upgrade.setId(controlMessage.upgrade.id);
-    t_upgrade.setDownload((mifsa_ota_idl::Method::Literal)controlMessage.upgrade.download);
-    t_upgrade.setDeploy((mifsa_ota_idl::Method::Literal)controlMessage.upgrade.deploy);
+    t_upgrade.setDownload((mifsa_ota_idl::Common::Method::Literal)controlMessage.upgrade.download);
+    t_upgrade.setDeploy((mifsa_ota_idl::Common::Method::Literal)controlMessage.upgrade.deploy);
     t_upgrade.setMaintenance(controlMessage.upgrade.maintenance);
-    mifsa_ota_idl::Packages t_packages;
+    mifsa_ota_idl::Common::Packages t_packages;
     for (const auto& package : controlMessage.upgrade.packages) {
-        const mifsa_ota_idl::Package& t_package = _getPackage(package);
+        const mifsa_ota_idl::Common::Package& t_package = _getPackage(package);
         t_packages.push_back(std::move(t_package));
     }
     t_upgrade.setPackages(std::move(t_packages));
     t_controlMessage.setUpgrade(std::move(t_upgrade));
-    mifsa_ota_idl::Depends t_depends;
+    mifsa_ota_idl::Common::Depends t_depends;
     for (const auto& str : controlMessage.depends) {
-        mifsa_ota_idl::Depend t_depend;
+        mifsa_ota_idl::Common::Depend t_depend;
         t_depend.setData(str);
         t_depends.push_back(std::move(t_depend));
     }
@@ -73,25 +73,25 @@ static mifsa_ota_idl::ControlMessage _getControlMessage(const ControlMessage& co
     return t_controlMessage;
 }
 
-static mifsa_ota_idl::DetailMessage _getDetailMessage(const DetailMessage& detailMessage)
+static mifsa_ota_idl::Common::DetailMessage _getDetailMessage(const DetailMessage& detailMessage)
 {
-    mifsa_ota_idl::DetailMessage t_detailMessage;
+    mifsa_ota_idl::Common::DetailMessage t_detailMessage;
     t_detailMessage.setId(detailMessage.id);
-    t_detailMessage.setState_((mifsa_ota_idl::ServerState::Literal)detailMessage.state);
-    t_detailMessage.setLast((mifsa_ota_idl::ServerState::Literal)detailMessage.last);
+    t_detailMessage.setState_((mifsa_ota_idl::Common::ServerState::Literal)detailMessage.state);
+    t_detailMessage.setLast((mifsa_ota_idl::Common::ServerState::Literal)detailMessage.last);
     t_detailMessage.setActive(detailMessage.active);
     t_detailMessage.setError_(detailMessage.error);
     t_detailMessage.setStep(detailMessage.step);
     t_detailMessage.setProgress(detailMessage.progress);
     t_detailMessage.setMessage(detailMessage.message);
-    mifsa_ota_idl::Details t_details;
+    mifsa_ota_idl::Common::Details t_details;
     for (const auto& d : detailMessage.details) {
-        mifsa_ota_idl::Detail t_detail;
-        mifsa_ota_idl::Domain t_domain;
+        mifsa_ota_idl::Common::Detail t_detail;
+        mifsa_ota_idl::Common::Domain t_domain;
         t_domain.setName(d.domain.name);
         t_domain.setGuid(d.domain.guid);
-        t_domain.setState_((mifsa_ota_idl::ClientState::Literal)d.domain.state);
-        t_domain.setLast((mifsa_ota_idl::ClientState::Literal)d.domain.last);
+        t_domain.setState_((mifsa_ota_idl::Common::ClientState::Literal)d.domain.state);
+        t_domain.setLast((mifsa_ota_idl::Common::ClientState::Literal)d.domain.last);
         t_domain.setWatcher(d.domain.watcher);
         t_domain.setError_(d.domain.error);
         t_domain.setVersion_(d.domain.version);
@@ -99,13 +99,13 @@ static mifsa_ota_idl::DetailMessage _getDetailMessage(const DetailMessage& detai
         t_domain.setMeta(d.domain.meta.toJson());
         t_domain.setProgress(d.domain.progress);
         t_domain.setMessage(d.domain.message);
-        t_domain.setAnswer((mifsa_ota_idl::Answer::Literal)d.domain.answer);
+        t_domain.setAnswer((mifsa_ota_idl::Common::Answer::Literal)d.domain.answer);
         t_detail.setDomain(std::move(t_domain));
-        const mifsa_ota_idl::Package& t_package = _getPackage(d.package);
+        const mifsa_ota_idl::Common::Package& t_package = _getPackage(d.package);
         t_detail.setPackage_(std::move(t_package));
-        mifsa_ota_idl::Transfers t_transfers;
+        mifsa_ota_idl::Common::Transfers t_transfers;
         for (const auto& transfer : d.transfers) {
-            mifsa_ota_idl::Transfer t_transfer;
+            mifsa_ota_idl::Common::Transfer t_transfer;
             t_transfer.setDomain(transfer.domain);
             t_transfer.setName(transfer.name);
             t_transfer.setProgress(transfer.progress);
@@ -125,7 +125,7 @@ static mifsa_ota_idl::DetailMessage _getDetailMessage(const DetailMessage& detai
     return t_detailMessage;
 }
 
-static DomainMessage _getDomainMessage(const mifsa_ota_idl::DomainMessage& t_domainMessage)
+static DomainMessage _getDomainMessage(const mifsa_ota_idl::Common::DomainMessage& t_domainMessage)
 {
     DomainMessage domainMessage;
     domainMessage.domain.name = t_domainMessage.getDomain().getName();
@@ -144,7 +144,7 @@ static DomainMessage _getDomainMessage(const mifsa_ota_idl::DomainMessage& t_dom
     return domainMessage;
 }
 
-class ServerInterfaceAdapter : public ServerInterface, protected mifsa_ota_idlStubDefault {
+class ServerInterfaceAdapter : public ServerInterface, protected mifsa_ota_idl::CommonStubDefault {
 public:
     ServerInterfaceAdapter()
     {
@@ -152,8 +152,8 @@ public:
         if (!vsomeipApiCfg.empty()) {
             Utils::setEnvironment("VSOMEIP_CONFIGURATION", vsomeipApiCfg);
         }
-        std::shared_ptr<mifsa_ota_idlStubDefault> ptr = std::shared_ptr<mifsa_ota_idlStubDefault>((mifsa_ota_idlStubDefault*)this);
-        CommonAPI::Runtime::get()->registerService("local", "commonapi.mifsa.ota.interfaces", ptr, "mifsa_ota_server");
+        std::shared_ptr<mifsa_ota_idl::CommonStubDefault> ptr = std::shared_ptr<mifsa_ota_idl::CommonStubDefault>((mifsa_ota_idl::CommonStubDefault*)this);
+        CommonAPI::Runtime::get()->registerService("local", "mifsa_ota_idl.Common", ptr, "mifsa_ota_server");
     }
     ~ServerInterfaceAdapter()
     {
@@ -167,11 +167,13 @@ public:
     }
     virtual void sendControlMessage(const ControlMessage& controlMessage) override
     {
-        mifsa_ota_idlStubDefault::fireDispatchControlMessageEvent(_getControlMessage(controlMessage));
+        const auto& t_controlMessage = _getControlMessage(controlMessage);
+        mifsa_ota_idl::CommonStubDefault::fireDispatchControlMessageEvent(t_controlMessage);
     }
     virtual void sendDetailMessage(const DetailMessage& detailMessage) override
     {
-        mifsa_ota_idlStubDefault::fireDispatchDetailMessageEvent(_getDetailMessage(detailMessage));
+        const auto& t_detailMessage = _getDetailMessage(detailMessage);
+        mifsa_ota_idl::CommonStubDefault::fireDispatchDetailMessageEvent(t_detailMessage);
     }
     virtual void setCbReportDomain(const CbDomain& cb) override
     {
@@ -179,7 +181,7 @@ public:
     }
 
 protected:
-    virtual void invokeDomainMessage(const std::shared_ptr<CommonAPI::ClientId> client, mifsa_ota_idl::DomainMessage t_domainMessage) override
+    virtual void invokeDomainMessage(const std::shared_ptr<CommonAPI::ClientId> client, mifsa_ota_idl::Common::DomainMessage t_domainMessage) override
     {
         MIFSA_UNUSED(client);
         const auto& domainMessage = _getDomainMessage(t_domainMessage);

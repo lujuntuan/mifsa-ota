@@ -33,9 +33,6 @@ struct MIFSA_EXPORT WebInit final {
     std::string tenant;
     std::string id;
     Token token;
-
-public:
-    MIFSA_EXPORT friend std::ostream& operator<<(std::ostream& ostream, const WebInit& webInit) noexcept;
 };
 }
 

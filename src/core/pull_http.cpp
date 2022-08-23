@@ -11,7 +11,7 @@
  **********************************************************************************/
 
 #include "setting.h"
-#if (defined(MIFSA_OTA_BUILD_SERVER) && defined(MIFSA_OTA_USE_PULL_HTTP))
+#if (defined(MIFSA_OTA_BUILD_SERVER) && defined(MIFSA_OTA_ENABLE_PULL_HTTP))
 #include "core.h"
 
 MIFSA_NAMESPACE_BEGIN

@@ -163,11 +163,13 @@ public:
     }
     virtual void sendControlMessage(const ControlMessage& controlMessage) override
     {
-        m_control->publish(_getControlMessage(controlMessage));
+        const auto& t_controlMessage = _getControlMessage(controlMessage);
+        m_control->publish(t_controlMessage);
     }
     virtual void sendDetailMessage(const DetailMessage& detailMessage) override
     {
-        m_detail->publish(_getDetailMessage(detailMessage));
+        const auto& t_detailMessage = _getDetailMessage(detailMessage);
+        m_detail->publish(t_detailMessage);
     }
     virtual void setCbReportDomain(const CbDomain& cb) override
     {

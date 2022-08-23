@@ -11,7 +11,7 @@
  **********************************************************************************/
 
 #include "setting.h"
-#if (defined(MIFSA_OTA_BUILD_CLIENT) && defined(MIFSA_OTA_USE_DOWNLOAD_HTTP)) || (defined(MIFSA_OTA_BUILD_SERVER) && defined(MIFSA_OTA_USE_PULL_HTTP))
+#if (defined(MIFSA_OTA_BUILD_CLIENT) && defined(MIFSA_OTA_ENABLE_DOWNLOAD_HTTP)) || (defined(MIFSA_OTA_BUILD_SERVER) && defined(MIFSA_OTA_ENABLE_PULL_HTTP))
 #include "config_http.h"
 #include "core.h"
 #include "helper.h"
@@ -26,7 +26,7 @@ MIFSA_NAMESPACE_BEGIN
 
 namespace Ota {
 namespace Core {
-#ifdef MIFSA_OTA_USE_DOWNLOAD_HTTP
+#ifdef MIFSA_OTA_ENABLE_DOWNLOAD_HTTP
     extern Status httpDownloadCommon(const std::string& dir, const Files& files, const VariantMap& config,
         const BreakFunction& breakFunction,
         const ProgressFunction& progressFunction);
@@ -320,8 +320,8 @@ namespace Core {
                         if (statusHelper.checkDone()) {
                             return;
                         }
-                        statusHelper.throwError(115);
-                        LOG_WARNING("not finished", " (" + helper->fileName + ")");
+                        // statusHelper.throwError(115); //!!bug todo!!
+                        // LOG_WARNING("not finished", " (" + helper->fileName + ")");
                     }
                 }
                 if (helper->wfile.is_open()) {

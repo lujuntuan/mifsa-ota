@@ -20,7 +20,7 @@ MIFSA_OTA_TEST_COUNT=10
 
 usage_func() {
     echo "Usage:"
-    echo -e "mifsa_ota_sample_test.sh \n \
+    echo -e "mifsa_ota_example_sample_test.sh \n \
     [-l MIFSA_OTA_PART_LIBDIR] \n \
     [-b MIFSA_OTA_PART_BINDIR] \n \
     [-n MIFSA_OTA_NAME_PREFIX] \n \
@@ -45,7 +45,7 @@ export LD_LIBRARY_PATH=$MIFSA_OTA_PART_LIBDIR:$LD_LIBRARY_PATH
 for i in $(seq 1 $MIFSA_OTA_TEST_COUNT)
 do
     echo "Start ${MIFSA_OTA_NAME_PREFIX}_${i}..."
-    ${MIFSA_OTA_PART_BINDIR}/mifsa_ota_client_simple --name=${MIFSA_OTA_NAME_PREFIX}_${i} &
+    ${MIFSA_OTA_PART_BINDIR}/mifsa_ota_example_sample --name=${MIFSA_OTA_NAME_PREFIX}_${i} &
     usleep 100000
 done
 
@@ -56,7 +56,7 @@ if [ "${USER_KILL}" = "n" -o "${USER_KILL}" = "N" ]; then
     exit 0
 fi
 
-killall -9 mifsa_ota_client_simple
+killall -9 mifsa_ota_example_sample
 
 echo "Done."
 

@@ -11,7 +11,7 @@
  **********************************************************************************/
 
 #include "setting.h"
-#if (defined(MIFSA_OTA_BUILD_SERVER) && defined(MIFSA_OTA_USE_MESSAGE_HTTP))
+#if (defined(MIFSA_OTA_BUILD_SERVER) && defined(MIFSA_OTA_ENABLE_MESSAGE_HTTP))
 #include "config_http.h"
 #include "core.h"
 #include "helper.h"

@@ -37,7 +37,7 @@ namespace Core {
             client.set_read_timeout(MIFSA_OTA_WEB_TIMEOUT / 1000);
             client.set_write_timeout(MIFSA_OTA_WEB_TIMEOUT / 1000);
         }
-#ifdef MIFSA_OTA_USE_HTTPS
+#ifdef MIFSA_OTA_ENABLE_HTTPS
         if (config.value("web_ca_cert_path").isValid()) {
             client.set_ca_cert_path(config.value("web_ca_cert_path").toCString());
             client.enable_server_certificate_verification(true);

@@ -61,7 +61,7 @@ WebQueue::WebQueue()
     if (mifsa_ota_server->config().value("distribute_port").isValid()) {
         m_hpr->distributePort = mifsa_ota_server->config().value("distribute_port").toInt();
     } else {
-#ifdef MIFSA_OTA_USE_HTTPS
+#ifdef MIFSA_OTA_ENABLE_HTTPS
         m_hpr->distributePort = 9443;
 #else
         m_hpr->distributePort = 9080;
@@ -70,8 +70,8 @@ WebQueue::WebQueue()
     if (mifsa_ota_server->config().value("upgrade_check_interval").isValid()) {
         m_hpr->checkInterval = (uint32_t)mifsa_ota_server->config().value("upgrade_check_interval").toInt();
     }
-#if defined(MIFSA_OTA_USE_DOWNLOAD_HTTP) && defined(MIFSA_OTA_USE_DISTRIBUTE_HTTP)
-#ifdef MIFSA_OTA_USE_HTTPS
+#if defined(MIFSA_OTA_ENABLE_DOWNLOAD_HTTP) && defined(MIFSA_OTA_ENABLE_DISTRIBUTE_HTTP)
+#ifdef MIFSA_OTA_ENABLE_HTTPS
     std::string protocName = "https://";
 #else
     std::string protocName = "http://";

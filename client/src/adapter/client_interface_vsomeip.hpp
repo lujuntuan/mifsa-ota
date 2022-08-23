@@ -17,14 +17,14 @@
 #include <CommonAPI/CommonAPI.hpp>
 #include <mifsa/utils/dir.h>
 #include <mifsa/utils/host.h>
-#include <v1/commonapi/mifsa_ota_idlProxy.hpp>
+#include <v1/mifsa_ota_idl/CommonProxy.hpp>
 
-using namespace v1_0::commonapi;
+using namespace v1_0;
 
 MIFSA_NAMESPACE_BEGIN
 
 namespace Ota {
-static Package _getPackage(const mifsa_ota_idl::Package& t_package)
+static Package _getPackage(const mifsa_ota_idl::Common::Package& t_package)
 {
     Package package;
     package.domain = t_package.getDomain();
@@ -45,7 +45,7 @@ static Package _getPackage(const mifsa_ota_idl::Package& t_package)
     return package;
 }
 
-static ControlMessage _getControlMessage(const mifsa_ota_idl::ControlMessage& t_controlMessage)
+static ControlMessage _getControlMessage(const mifsa_ota_idl::Common::ControlMessage& t_controlMessage)
 {
     ControlMessage controlMessage;
     controlMessage.id = t_controlMessage.getId();
@@ -64,7 +64,7 @@ static ControlMessage _getControlMessage(const mifsa_ota_idl::ControlMessage& t_
     return controlMessage;
 }
 
-static DetailMessage _getDetailMessage(const mifsa_ota_idl::DetailMessage& t_detailMessage)
+static DetailMessage _getDetailMessage(const mifsa_ota_idl::Common::DetailMessage& t_detailMessage)
 {
     DetailMessage detailMessage;
     detailMessage.id = t_detailMessage.getId();
@@ -111,14 +111,14 @@ static DetailMessage _getDetailMessage(const mifsa_ota_idl::DetailMessage& t_det
     return detailMessage;
 }
 
-static mifsa_ota_idl::DomainMessage _getDomainMessage(const DomainMessage& domainMessage)
+static mifsa_ota_idl::Common::DomainMessage _getDomainMessage(const DomainMessage& domainMessage)
 {
-    mifsa_ota_idl::DomainMessage t_domainMessage;
-    mifsa_ota_idl::Domain t_domain;
+    mifsa_ota_idl::Common::DomainMessage t_domainMessage;
+    mifsa_ota_idl::Common::Domain t_domain;
     t_domain.setName(domainMessage.domain.name);
     t_domain.setGuid(domainMessage.domain.guid);
-    t_domain.setState_((mifsa_ota_idl::ClientState::Literal)domainMessage.domain.state);
-    t_domain.setLast((mifsa_ota_idl::ClientState::Literal)domainMessage.domain.last);
+    t_domain.setState_((mifsa_ota_idl::Common::ClientState::Literal)domainMessage.domain.state);
+    t_domain.setLast((mifsa_ota_idl::Common::ClientState::Literal)domainMessage.domain.last);
     t_domain.setWatcher(domainMessage.domain.watcher);
     t_domain.setError_(domainMessage.domain.error);
     t_domain.setVersion_(domainMessage.domain.version);
@@ -126,7 +126,7 @@ static mifsa_ota_idl::DomainMessage _getDomainMessage(const DomainMessage& domai
     t_domain.setMeta(domainMessage.domain.meta.toJson());
     t_domain.setProgress(domainMessage.domain.progress);
     t_domain.setMessage(domainMessage.domain.message);
-    t_domain.setAnswer((mifsa_ota_idl::Answer::Literal)domainMessage.domain.answer);
+    t_domain.setAnswer((mifsa_ota_idl::Common::Answer::Literal)domainMessage.domain.answer);
     t_domainMessage.setDomain(std::move(t_domain));
     t_domainMessage.setDiscovery(domainMessage.discovery);
     return t_domainMessage;
@@ -140,7 +140,7 @@ public:
         if (!vsomeipApiCfg.empty()) {
             Utils::setEnvironment("VSOMEIP_CONFIGURATION", vsomeipApiCfg);
         }
-        m_commonApiProxy = CommonAPI::Runtime::get()->buildProxy<mifsa_ota_idlProxy>("local", "commonapi.mifsa.ota.interfaces", "mifsa_ota_client");
+        m_commonApiProxy = CommonAPI::Runtime::get()->buildProxy<mifsa_ota_idl::CommonProxy>("local", "mifsa_ota_idl.Common", "mifsa_ota_client");
         m_commonApiProxy->getProxyStatusEvent().subscribe([this](const CommonAPI::AvailabilityStatus& status) {
             if (status == CommonAPI::AvailabilityStatus::AVAILABLE) {
                 cbConnected(true);
@@ -148,8 +148,8 @@ public:
                 cbConnected(false);
             }
         });
-        m_commonApiProxy->getDispatchControlMessageEvent().subscribe([this](const mifsa_ota_idl::ControlMessage& t_controlMessage) {
-            if (checkControlMessageId && !checkControlMessageId(t_controlMessage.getId())) {
+        m_commonApiProxy->getDispatchControlMessageEvent().subscribe([this](const mifsa_ota_idl::Common::ControlMessage& t_controlMessage) {
+            if (checkControlMessageId && checkControlMessageId(t_controlMessage.getId())) {
                 return;
             }
             const auto& controlMessage = _getControlMessage(t_controlMessage);
@@ -184,8 +184,8 @@ public:
     virtual void setCbDetailMessage(CbDetailMessage cb) override
     {
         m_cbDetailMessage = cb;
-        m_commonApiProxy->getDispatchDetailMessageEvent().subscribe([this](const mifsa_ota_idl::DetailMessage& t_detailMessage) {
-            if (checkDetailMessageId && !checkDetailMessageId(t_detailMessage.getId())) {
+        m_commonApiProxy->getDispatchDetailMessageEvent().subscribe([this](const mifsa_ota_idl::Common::DetailMessage& t_detailMessage) {
+            if (checkDetailMessageId && checkDetailMessageId(t_detailMessage.getId())) {
                 return;
             }
             const auto& detailMessage = _getDetailMessage(t_detailMessage);
@@ -200,12 +200,13 @@ public:
             return false;
         }
         CommonAPI::CallStatus callStatus;
-        m_commonApiProxy->invokeDomainMessage(_getDomainMessage(domainMessage), callStatus);
+        const auto& t_domainMessage = _getDomainMessage(domainMessage);
+        m_commonApiProxy->invokeDomainMessage(t_domainMessage, callStatus);
         return true;
     }
 
 private:
-    std::shared_ptr<mifsa_ota_idlProxy<>> m_commonApiProxy;
+    std::shared_ptr<mifsa_ota_idl::CommonProxy<>> m_commonApiProxy;
     CbControlMessage m_cbControlMessage;
     CbDetailMessage m_cbDetailMessage;
 };

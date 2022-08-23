@@ -11,20 +11,25 @@
     "applications" :
     [
         {
-            "name" : "mifsa_ota_client",
-            "id" : "12002"
+            "name" : "mifsa_ota_server",
+            "id" : "11001"
         }
     ],
     "services" :
     [
         {
-            "service" : "12101",
-            "instance" : "12201",
+            "service" : "11101",
+            "instance" : "11201",
             "reliable" : { "port" : "53250", "enable-magic-cookies" : "false" },
             "events" :
             [
                 {
-                    "event" : "12620",
+                    "event" : "51620",
+                    "is_field" : "false",
+                    "is_reliable" : "true"
+                },
+                {
+                    "event" : "51621",
                     "is_field" : "false",
                     "is_reliable" : "true"
                 }
@@ -32,8 +37,12 @@
             "eventgroups" :
             [
                 {
-                    "eventgroup" : "12620",
-                    "events" : [ "12620" ]
+                    "eventgroup" : "51620",
+                    "events" : [ "51620" ]
+                },
+                {
+                    "eventgroup" : "51621",
+                    "events" : [ "51621" ]
                 }
             ]
         }

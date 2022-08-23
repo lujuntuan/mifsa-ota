@@ -11,7 +11,7 @@
  **********************************************************************************/
 
 #include "setting.h"
-#if (defined(MIFSA_OTA_USE_VERIFY_OPENSSL))
+#if (defined(MIFSA_OTA_ENABLE_VERIFY_OPENSSL))
 #include "core.h"
 #include "helper.h"
 #include "hpplib/httplib.hpp"

@@ -32,5 +32,4 @@ target_compile_definitions(
     PRIVATE
     "-DCPPHTTPLIB_OPENSSL_SUPPORT"
     )
-
 mifsa_module_end()

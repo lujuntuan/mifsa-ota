@@ -11,7 +11,7 @@
  **********************************************************************************/
 
 #include "setting.h"
-#if (defined(MIFSA_OTA_BUILD_SERVER) && defined(MIFSA_OTA_USE_DISTRIBUTE_HTTP))
+#if (defined(MIFSA_OTA_BUILD_SERVER) && defined(MIFSA_OTA_ENABLE_DISTRIBUTE_HTTP))
 #include "config_http.h"
 #include "core.h"
 #include "helper.h"
@@ -64,7 +64,7 @@ namespace Core {
             bool finished = false;
         };
         std::vector<Helper*> helpers;
-#ifdef MIFSA_OTA_USE_HTTPS
+#ifdef MIFSA_OTA_ENABLE_HTTPS
         if (!config.value("web_server_cert_path").isValid() || !config.value("web_server_key_path").isValid()) {
             statusHelper.throwError(304);
             LOG_WARNING("distribute web_server_cert_path or web_server_key_path  is empty");

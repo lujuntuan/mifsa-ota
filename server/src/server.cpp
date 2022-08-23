@@ -213,13 +213,11 @@ void Server::begin()
     //
     m_hpr->processDomainsTimer = createTimer(MIFSA_OTA_PROCESS_DOMAIN_TIME, true, std::bind(&Server::processDomains, this));
     m_hpr->processDomainsTimer->start();
-    // onStart();
 }
 
 void Server::end()
 {
     ServerProxy::begin();
-    // onStop();
 }
 
 void Server::eventChanged(const std::shared_ptr<Event>& event)
@@ -235,7 +233,8 @@ void Server::eventChanged(const std::shared_ptr<Event>& event)
         int error = serverEvent->data().value("error").toInt();
         if (m_hpr->state == MR_DOWNLOAD || m_hpr->state == MR_VERIFY || m_hpr->state == MR_DISTRIBUTE) {
             if (m_hpr->retryTimes < MIFSA_OTA_RETRY_TIMES) {
-                wait(10);
+                m_hpr->webQueue.postEvent(std::make_shared<WebEvent>(WebEvent::REQ_CHECK));
+                wait(1000);
                 LOG_WARNING("retry download");
                 download();
                 m_hpr->retryTimes++;
@@ -322,7 +321,7 @@ void Server::eventChanged(const std::shared_ptr<Event>& event)
             break;
         }
         if (m_hpr->upgrade.download != Upgrade::MTHD_SKIP) {
-            wait(10);
+            wait(100);
             sendControlMessage(CTL_DOWNLOAD);
         }
         setState(MR_DISTRIBUTE);
@@ -917,7 +916,6 @@ void Server::sendControlMessage(Control control, bool cache)
     }
     ControlMessage controlMessage(m_hpr->controlMessageId, control, upgrade(), depends());
     interface()->sendControlMessage(controlMessage);
-    // onSendControlMessage(m_hpr->controlMessageId);
 }
 
 void Server::sendDetailMessage(bool cache)
@@ -928,9 +926,8 @@ void Server::sendDetailMessage(bool cache)
             m_hpr->detailMessageId = 0;
         }
     }
-    DetailMessage detailMessage(m_hpr->controlMessageId, state(), lastState(), isActive(), errorCode(), step(), progress(), message(), details());
+    DetailMessage detailMessage(m_hpr->detailMessageId, state(), lastState(), isActive(), errorCode(), step(), progress(), message(), details());
     interface()->sendDetailMessage(detailMessage);
-    // onSendDetailMessage(m_hpr->detailMessageId);
 }
 
 static int getMaxDeployTime(const Detail& d)

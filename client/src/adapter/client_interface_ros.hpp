@@ -139,7 +139,7 @@ public:
             auto qosConfig = rclcpp::QoS(rclcpp::KeepLast(10)).reliable();
             m_control = m_node->create_subscription<mifsa_ota_idl::msg::ControlMessage>("/mifsa/ota/control", qosConfig,
                 [this](mifsa_ota_idl::msg::ControlMessage::UniquePtr t_controlMessage) {
-                    if (checkControlMessageId && !checkControlMessageId(t_controlMessage->id)) {
+                    if (checkControlMessageId && checkControlMessageId(t_controlMessage->id)) {
                         return;
                     }
                     const auto& controlMessage = _getControlMessage(t_controlMessage);
@@ -195,7 +195,7 @@ public:
         auto qosConfig = rclcpp::QoS(rclcpp::KeepLast(10)).reliable();
         m_detail = m_node->create_subscription<mifsa_ota_idl::msg::DetailMessage>("/mifsa/ota/detail", qosConfig,
             [this](mifsa_ota_idl::msg::DetailMessage::UniquePtr t_detailMessage) {
-                if (checkDetailMessageId && !checkDetailMessageId(t_detailMessage->id)) {
+                if (checkDetailMessageId && checkDetailMessageId(t_detailMessage->id)) {
                     return;
                 }
                 const auto& detailMessage = _getDetailMessage(t_detailMessage);
@@ -209,7 +209,8 @@ public:
         if (!connected()) {
             return false;
         }
-        m_domain->publish(_getDomainMessage(domainMessage));
+        const auto& t_domainMessage = _getDomainMessage(domainMessage);
+        m_domain->publish(t_domainMessage);
         return true;
     }
 

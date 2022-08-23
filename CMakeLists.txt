@@ -40,19 +40,21 @@ add_custom_target(
     ${PROJECT_NAME}_headers
     SOURCES
     ${PROJECT_HEADERS}
-)
+    )
 
 mifsa_install_etc(mifsa_${MIFSA_MODULE_TYPE}_root_etc ${PROJECT_SOURCE_DIR})
 mifsa_install_share(mifsa_${MIFSA_MODULE_TYPE}_root_share ${PROJECT_SOURCE_DIR})
 
-option(MIFSA_OTA_BUILD_SERVER "Build ota server" ON)
-option(MIFSA_OTA_BUILD_CLIENT "Build ota client" ON)
-option(MIFSA_OTA_USE_HTTPS "ota module use https" ON)
+option(MIFSA_OTA_BUILD_SERVER "Build ${MIFSA_MODULE_TYPE} server" ON)
+option(MIFSA_OTA_BUILD_CLIENT "Build ${MIFSA_MODULE_TYPE} client" ON)
+option(MIFSA_OTA_ENABLE_HTTPS "ota module use https" OFF)
 add_subdirectory(idls)
 if(MIFSA_OTA_BUILD_SERVER)
+    message("** Build ${MIFSA_MODULE_TYPE} server")
     add_subdirectory(server)
 endif()
 if(MIFSA_OTA_BUILD_CLIENT)
+    message("** Build ${MIFSA_MODULE_TYPE} client")
     add_subdirectory(client)
     if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/c)
         add_subdirectory(c)

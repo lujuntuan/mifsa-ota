@@ -1,33 +1,33 @@
 import "platform:/plugin/org.genivi.commonapi.someip/deployment/CommonAPI-SOMEIP_deployment_spec.fdepl"
 import "ota.fidl"
 
-define org.genivi.commonapi.someip.deployment for interface commonapi.mifsa_ota_idl {
-    SomeIpServiceID = 15068
+define org.genivi.commonapi.someip.deployment for interface mifsa_ota_idl.Common {
+    SomeIpServiceID = 11101
     method invokeDomainMessage {
-        SomeIpMethodID = 15078
+        SomeIpMethodID = 11510
         SomeIpReliable = true
         in {
         }
     }
     broadcast dispatchControlMessage {
-        SomeIpEventID = 48101
+        SomeIpEventID = 51620
         SomeIpReliable = true
-        SomeIpEventGroups = { 48101 }
+        SomeIpEventGroups = { 51620 }
         out {
         }
     }
     broadcast dispatchDetailMessage {
-        SomeIpEventID = 48102
+        SomeIpEventID = 51621
         SomeIpReliable = true
-        SomeIpEventGroups = { 48102 }
+        SomeIpEventGroups = { 51621 }
         out {
         }
     }
 }
 
 define org.genivi.commonapi.someip.deployment for provider as Service {
-    instance commonapi.mifsa_ota_idl {
-        InstanceId = "commonapi.mifsa_ota_idl"
-        SomeIpInstanceID = 26068
+    instance mifsa_ota_idl.Common {
+        InstanceId = "mifsa_ota_idl.Common"
+        SomeIpInstanceID = 11201
     }
 }
