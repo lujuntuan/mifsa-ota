@@ -13,6 +13,8 @@
 #ifndef MIFSA_OTA_CONFIG_H
 #define MIFSA_OTA_CONFIG_H
 
+#include <mifsa/base/config.h>
+
 #define MIFSA_OTA_NAME "@PROJECT_NAME@"
 #define MIFSA_OTA_VERSION "@PROJECT_VERSION@"
 #define MIFSA_OTA_VERSION_MAJOR "@PROJECT_VERSION_MAJOR@"

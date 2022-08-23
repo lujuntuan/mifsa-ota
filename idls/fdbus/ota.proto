@@ -1,5 +1,5 @@
 syntax = "proto3";
-package mifsa.ota.pb;
+package mifsa_ota_idl;
 
 enum MsgID {
     TP_UNKNOWN = 0;

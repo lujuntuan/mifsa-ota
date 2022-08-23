@@ -65,8 +65,8 @@ private:
     bool hasSubscibeDeploy() const;
     bool hasSubscibeDetail() const;
     void sendHeartbeat();
-    void processControlMessage(ControlMessage&& controlMessage);
-    void processDetailMessage(DetailMessage&& detailMessage);
+    void processControlMessage(const ControlMessage& controlMessage);
+    void processDetailMessage(const DetailMessage& detailMessage);
     bool checkControlMessageId(uint32_t id) const;
     bool checkDetailMessageId(uint32_t id) const;
     void setDomainState(ClientState state);

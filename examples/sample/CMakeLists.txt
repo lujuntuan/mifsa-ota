@@ -24,8 +24,23 @@ target_link_libraries(
     )
 install(
     TARGETS
-    ${SUB_PROJECT_NAME}
+    ${PROJECT_NAME}
     RUNTIME
     DESTINATION
     ${CMAKE_INSTALL_LIBDIR}
     )
+
+if(LINUX)
+    add_custom_command(
+        TARGET
+        ${PROJECT_NAME}
+        POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/*.sh ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+        )
+    install(
+        FILES
+        ${PROJECT_SOURCE_DIR}/*.sh
+        DESTINATION
+        share/${CMAKE_INSTALL_BINDIR}
+        )
+endif()

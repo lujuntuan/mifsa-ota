@@ -17,123 +17,121 @@
 #include <CommonAPI/CommonAPI.hpp>
 #include <mifsa/utils/dir.h>
 #include <mifsa/utils/host.h>
-#include <v1/commonapi/mifsa/ota/interfacesProxy.hpp>
+#include <v1/commonapi/mifsa_ota_idlProxy.hpp>
 
-using namespace v1_0::commonapi::mifsa::ota;
+using namespace v1_0::commonapi;
 
 MIFSA_NAMESPACE_BEGIN
 
-CommonAPI::CallInfo _callInfo(5000);
-
 namespace Ota {
-static Package _getPackage(const interfaces::Package& ci_package)
+static Package _getPackage(const mifsa_ota_idl::Package& t_package)
 {
     Package package;
-    package.domain = ci_package.getDomain();
-    package.part = ci_package.getPart();
-    package.version = ci_package.getVersion_();
-    package.meta = Variant::readJson(ci_package.getMeta());
-    for (const auto& ci_file : ci_package.getFiles()) {
+    package.domain = t_package.getDomain();
+    package.part = t_package.getPart();
+    package.version = t_package.getVersion_();
+    package.meta = Variant::readJson(t_package.getMeta());
+    for (const auto& t_file : t_package.getFiles()) {
         File file;
-        file.domain = ci_file.getDomain();
-        file.name = ci_file.getName();
-        file.url = ci_file.getUrl();
-        file.size = ci_file.getSize();
-        file.md5 = ci_file.getMd5();
-        file.sha1 = ci_file.getSha1();
-        file.sha256 = ci_file.getSha256();
+        file.domain = t_file.getDomain();
+        file.name = t_file.getName();
+        file.url = t_file.getUrl();
+        file.size = t_file.getSize();
+        file.md5 = t_file.getMd5();
+        file.sha1 = t_file.getSha1();
+        file.sha256 = t_file.getSha256();
         package.files.push_back(std::move(file));
     }
     return package;
 }
 
-static ControlMessage _getControlMessage(const interfaces::ControlMessage& ci_controlMessage)
+static ControlMessage _getControlMessage(const mifsa_ota_idl::ControlMessage& t_controlMessage)
 {
-    uint32_t id = ci_controlMessage.getId();
-    Control control = (Control)ci_controlMessage.getControl().value_;
-    Upgrade upgrade;
-    upgrade.id = ci_controlMessage.getUpgrade().getId();
-    upgrade.download = (Upgrade::Method)ci_controlMessage.getUpgrade().getDownload().value_;
-    upgrade.deploy = (Upgrade::Method)ci_controlMessage.getUpgrade().getDeploy().value_;
-    upgrade.maintenance = ci_controlMessage.getUpgrade().getMaintenance();
-    for (const auto& ci_package : ci_controlMessage.getUpgrade().getPackages()) {
-        const Package& package = _getPackage(ci_package);
-        upgrade.packages.push_back(std::move(package));
+    ControlMessage controlMessage;
+    controlMessage.id = t_controlMessage.getId();
+    controlMessage.control = (Control)t_controlMessage.getControl().value_;
+    controlMessage.upgrade.id = t_controlMessage.getUpgrade().getId();
+    controlMessage.upgrade.download = (Upgrade::Method)t_controlMessage.getUpgrade().getDownload().value_;
+    controlMessage.upgrade.deploy = (Upgrade::Method)t_controlMessage.getUpgrade().getDeploy().value_;
+    controlMessage.upgrade.maintenance = t_controlMessage.getUpgrade().getMaintenance();
+    for (const auto& t_package : t_controlMessage.getUpgrade().getPackages()) {
+        const Package& package = _getPackage(t_package);
+        controlMessage.upgrade.packages.push_back(std::move(package));
     }
-    Depends depends;
-    for (const auto& ci_depend : ci_controlMessage.getDepends()) {
-        depends.push_back(std::move(ci_depend.getData()));
+    for (const auto& t_depend : t_controlMessage.getDepends()) {
+        controlMessage.depends.push_back(std::move(t_depend.getData()));
     }
-    return ControlMessage(id, control, std::move(upgrade), std::move(depends));
+    return controlMessage;
 }
 
-static DetailMessage _getDetailMessage(const interfaces::DetailMessage& ci_detailMessage)
+static DetailMessage _getDetailMessage(const mifsa_ota_idl::DetailMessage& t_detailMessage)
 {
-    uint32_t id = ci_detailMessage.getId();
-    ServerState state = (ServerState)ci_detailMessage.getState_().value_;
-    ServerState last = (ServerState)ci_detailMessage.getLast().value_;
-    bool active = ci_detailMessage.getActive();
-    int error = ci_detailMessage.getError_();
-    float step = ci_detailMessage.getStep();
-    float progress = ci_detailMessage.getProgress();
-    const std::string& message = ci_detailMessage.getMessage();
-    Details details;
-    for (const auto& ci_detail : ci_detailMessage.getDetails()) {
-        Domain domain(ci_detail.getDomain().getName(), ci_detail.getDomain().getGuid());
-        domain.state = (ClientState)ci_detail.getDomain().getState_().value_;
-        domain.last = (ClientState)ci_detail.getDomain().getLast().value_;
-        domain.watcher = ci_detail.getDomain().getWatcher();
-        domain.error = ci_detail.getDomain().getError_();
-        domain.version = ci_detail.getDomain().getVersion_();
-        domain.attribute = Variant::readJson(ci_detail.getDomain().getAttribute_());
-        domain.meta = Variant::readJson(ci_detail.getDomain().getMeta());
-        domain.progress = ci_detail.getDomain().getProgress();
-        domain.message = ci_detail.getDomain().getMessage();
-        domain.answer = (Answer)ci_detail.getDomain().getAnswer().value_;
+    DetailMessage detailMessage;
+    detailMessage.id = t_detailMessage.getId();
+    detailMessage.state = (ServerState)t_detailMessage.getState_().value_;
+    detailMessage.last = (ServerState)t_detailMessage.getLast().value_;
+    detailMessage.active = t_detailMessage.getActive();
+    detailMessage.error = t_detailMessage.getError_();
+    detailMessage.step = t_detailMessage.getStep();
+    detailMessage.progress = t_detailMessage.getProgress();
+    detailMessage.message = t_detailMessage.getMessage();
+    for (const auto& t_detail : t_detailMessage.getDetails()) {
+        Domain domain(t_detail.getDomain().getName(), t_detail.getDomain().getGuid());
+        domain.state = (ClientState)t_detail.getDomain().getState_().value_;
+        domain.last = (ClientState)t_detail.getDomain().getLast().value_;
+        domain.watcher = t_detail.getDomain().getWatcher();
+        domain.error = t_detail.getDomain().getError_();
+        domain.version = t_detail.getDomain().getVersion_();
+        domain.attribute = Variant::readJson(t_detail.getDomain().getAttribute_());
+        domain.meta = Variant::readJson(t_detail.getDomain().getMeta());
+        domain.progress = t_detail.getDomain().getProgress();
+        domain.message = t_detail.getDomain().getMessage();
+        domain.answer = (Answer)t_detail.getDomain().getAnswer().value_;
         Detail detail(std::move(domain));
-        const Package& package = _getPackage(ci_detail.getPackage_());
+        const auto& package = _getPackage(t_detail.getPackage_());
         detail.package = package;
-        for (const auto& ci_transfer : ci_detail.getTransfers()) {
+        for (const auto& t_transfer : t_detail.getTransfers()) {
             Transfer transfer;
-            transfer.domain = ci_transfer.getDomain();
-            transfer.name = ci_transfer.getName();
-            transfer.progress = ci_transfer.getProgress();
-            transfer.speed = ci_transfer.getSpeed();
-            transfer.total = ci_transfer.getTotal();
-            transfer.current = ci_transfer.getCurrent();
-            transfer.pass = ci_transfer.getPass();
-            transfer.left = ci_transfer.getLeft();
+            transfer.domain = t_transfer.getDomain();
+            transfer.name = t_transfer.getName();
+            transfer.progress = t_transfer.getProgress();
+            transfer.speed = t_transfer.getSpeed();
+            transfer.total = t_transfer.getTotal();
+            transfer.current = t_transfer.getCurrent();
+            transfer.pass = t_transfer.getPass();
+            transfer.left = t_transfer.getLeft();
             detail.transfers.push_back(std::move(transfer));
         }
-        detail.progress = ci_detail.getProgress();
-        if (ci_detail.getDeploy() > 0) {
-            detail.deploy.start(Elapsed::current() - ci_detail.getDeploy());
+        detail.progress = t_detail.getProgress();
+        if (t_detail.getDeploy() > 0) {
+            detail.deploy.start(Elapsed::current() - t_detail.getDeploy());
         }
-        details.push_back(std::move(detail));
+        detailMessage.details.push_back(std::move(detail));
     }
-    return DetailMessage(id, state, last, active, error, step, progress, std::move(message), std::move(details));
+    return detailMessage;
 }
 
-static interfaces::DomainMessage _getDomainMessage(const DomainMessage& domainMessage)
+static mifsa_ota_idl::DomainMessage _getDomainMessage(const DomainMessage& domainMessage)
 {
-    interfaces::DomainMessage ci_domainMessage;
-    interfaces::Domain ci_domain;
-    ci_domain.setName(domainMessage.domain.name);
-    ci_domain.setGuid(domainMessage.domain.guid);
-    ci_domain.setState_((interfaces::ClientState::Literal)domainMessage.domain.state);
-    ci_domain.setLast((interfaces::ClientState::Literal)domainMessage.domain.last);
-    ci_domain.setWatcher(domainMessage.domain.watcher);
-    ci_domain.setError_(domainMessage.domain.error);
-    ci_domain.setVersion_(domainMessage.domain.version);
-    ci_domain.setAttribute_(domainMessage.domain.attribute.toJson());
-    ci_domain.setMeta(domainMessage.domain.meta.toJson());
-    ci_domain.setProgress(domainMessage.domain.progress);
-    ci_domain.setMessage(domainMessage.domain.message);
-    ci_domain.setAnswer((interfaces::Answer::Literal)domainMessage.domain.answer);
-    ci_domainMessage.setDomain(std::move(ci_domain));
-    ci_domainMessage.setDiscovery(domainMessage.discovery);
-    return ci_domainMessage;
+    mifsa_ota_idl::DomainMessage t_domainMessage;
+    mifsa_ota_idl::Domain t_domain;
+    t_domain.setName(domainMessage.domain.name);
+    t_domain.setGuid(domainMessage.domain.guid);
+    t_domain.setState_((mifsa_ota_idl::ClientState::Literal)domainMessage.domain.state);
+    t_domain.setLast((mifsa_ota_idl::ClientState::Literal)domainMessage.domain.last);
+    t_domain.setWatcher(domainMessage.domain.watcher);
+    t_domain.setError_(domainMessage.domain.error);
+    t_domain.setVersion_(domainMessage.domain.version);
+    t_domain.setAttribute_(domainMessage.domain.attribute.toJson());
+    t_domain.setMeta(domainMessage.domain.meta.toJson());
+    t_domain.setProgress(domainMessage.domain.progress);
+    t_domain.setMessage(domainMessage.domain.message);
+    t_domain.setAnswer((mifsa_ota_idl::Answer::Literal)domainMessage.domain.answer);
+    t_domainMessage.setDomain(std::move(t_domain));
+    t_domainMessage.setDiscovery(domainMessage.discovery);
+    return t_domainMessage;
 }
+
 class ClientInterfaceAdapter : public ClientInterface {
 public:
     ClientInterfaceAdapter()
@@ -142,7 +140,7 @@ public:
         if (!vsomeipApiCfg.empty()) {
             Utils::setEnvironment("VSOMEIP_CONFIGURATION", vsomeipApiCfg);
         }
-        m_commonApiProxy = CommonAPI::Runtime::get()->buildProxy<interfacesProxy>("local", "commonapi.mifsa.ota.interfaces", "mifsa_ota_client");
+        m_commonApiProxy = CommonAPI::Runtime::get()->buildProxy<mifsa_ota_idlProxy>("local", "commonapi.mifsa.ota.interfaces", "mifsa_ota_client");
         m_commonApiProxy->getProxyStatusEvent().subscribe([this](const CommonAPI::AvailabilityStatus& status) {
             if (status == CommonAPI::AvailabilityStatus::AVAILABLE) {
                 cbConnected(true);
@@ -150,25 +148,26 @@ public:
                 cbConnected(false);
             }
         });
-        m_commonApiProxy->getDispatchControlMessageEvent().subscribe([this](const interfaces::ControlMessage& ci_controlMessage) {
-            if (mifsa_ota_client->checkControlMessageId(ci_controlMessage.getId())) {
+        m_commonApiProxy->getDispatchControlMessageEvent().subscribe([this](const mifsa_ota_idl::ControlMessage& t_controlMessage) {
+            if (checkControlMessageId && !checkControlMessageId(t_controlMessage.getId())) {
                 return;
             }
-            mifsa_ota_client->processControlMessage(_getControlMessage(ci_controlMessage));
+            const auto& controlMessage = _getControlMessage(t_controlMessage);
+            if (m_cbControlMessage) {
+                m_cbControlMessage(controlMessage);
+            }
         });
-        if (mifsa_ota_client->hasSubscibeDetail()) {
-            m_commonApiProxy->getDispatchDetailMessageEvent().subscribe([this](const interfaces::DetailMessage& ci_detailMessage) {
-                if (mifsa_ota_client->checkDetailMessageId(ci_detailMessage.getId())) {
-                    return;
-                }
-                mifsa_ota_client->processDetailMessage(_getDetailMessage(ci_detailMessage));
-            });
-        }
     }
     ~ClientInterfaceAdapter()
     {
         m_commonApiProxy.reset();
         CommonAPI::Runtime::get().reset();
+    }
+    virtual void onStarted() override
+    {
+    }
+    virtual void onStoped() override
+    {
     }
     virtual std::string version() override
     {
@@ -185,10 +184,19 @@ public:
     virtual void setCbDetailMessage(CbDetailMessage cb) override
     {
         m_cbDetailMessage = cb;
+        m_commonApiProxy->getDispatchDetailMessageEvent().subscribe([this](const mifsa_ota_idl::DetailMessage& t_detailMessage) {
+            if (checkDetailMessageId && !checkDetailMessageId(t_detailMessage.getId())) {
+                return;
+            }
+            const auto& detailMessage = _getDetailMessage(t_detailMessage);
+            if (m_cbDetailMessage) {
+                m_cbDetailMessage(detailMessage);
+            }
+        });
     }
     virtual bool sendDomain(const DomainMessage& domainMessage) override
     {
-        if (!m_commonApiProxy->isAvailable()) {
+        if (!connected()) {
             return false;
         }
         CommonAPI::CallStatus callStatus;
@@ -197,7 +205,7 @@ public:
     }
 
 private:
-    std::shared_ptr<interfacesProxy<>> m_commonApiProxy;
+    std::shared_ptr<mifsa_ota_idlProxy<>> m_commonApiProxy;
     CbControlMessage m_cbControlMessage;
     CbDetailMessage m_cbDetailMessage;
 };

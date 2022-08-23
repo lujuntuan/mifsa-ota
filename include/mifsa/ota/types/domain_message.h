@@ -29,9 +29,6 @@ struct DomainMessage final {
     }
     Domain domain;
     bool discovery = false;
-
-public:
-    MIFSA_EXPORT friend std::ostream& operator<<(std::ostream& ostream, const DomainMessage& domainMessage) noexcept;
 };
 }
 VARIANT_DECLARE_TYPE(Ota::DomainMessage, ota_domain_message);

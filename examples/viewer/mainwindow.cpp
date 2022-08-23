@@ -343,7 +343,7 @@ void MainWindow::updateProperty(QTreeWidgetItem* listItem)
     }
     const Mifsa::Ota::Detail& d = m_itemToDetail.value(listItem);
     // updateSubProperty(nullptr, QStringLiteral("name"), QString::fromStdString(d.domain.name));
-    updateSubProperty(nullptr, QStringLiteral("guid"), QString::fromStdString(d.domain.guid));
+    updateSubProperty(nullptr, QStringLiteral("guid"), d.domain.guid.empty() ? QStringLiteral("{empty}") : QString::fromStdString(d.domain.guid));
     // updateSubProperty(nullptr, QStringLiteral("state"), QString::fromStdString(Domain::getWrStateStr(d.domain.state)));
     updateSubProperty(nullptr, QStringLiteral("last"), QString::fromStdString(Mifsa::Ota::Domain::getWrStateStr(d.domain.last)));
     updateSubProperty(nullptr, QStringLiteral("watcher"), d.domain.watcher ? QStringLiteral("true") : QStringLiteral("false"));

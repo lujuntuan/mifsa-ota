@@ -43,9 +43,6 @@ struct DetailMessage final {
     float progress = .0f;
     std::string message;
     Details details;
-
-public:
-    MIFSA_EXPORT friend std::ostream& operator<<(std::ostream& ostream, const DetailMessage& detailMessage) noexcept;
 };
 }
 VARIANT_DECLARE_TYPE(Ota::DetailMessage, ota_detail_message);

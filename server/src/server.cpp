@@ -198,6 +198,7 @@ void Server::processDomainMessage(const DomainMessage& domainMessage)
 
 void Server::begin()
 {
+    ServerProxy::begin();
     std::string cacheDir = Utils::getTempDir();
     if (config().value("cache_dir").isValid()) {
         cacheDir = config().value("cache_dir").toString();
@@ -217,6 +218,7 @@ void Server::begin()
 
 void Server::end()
 {
+    ServerProxy::begin();
     // onStop();
 }
 
@@ -233,7 +235,7 @@ void Server::eventChanged(const std::shared_ptr<Event>& event)
         int error = serverEvent->data().value("error").toInt();
         if (m_hpr->state == MR_DOWNLOAD || m_hpr->state == MR_VERIFY || m_hpr->state == MR_DISTRIBUTE) {
             if (m_hpr->retryTimes < MIFSA_OTA_RETRY_TIMES) {
-                // wait(10);
+                wait(10);
                 LOG_WARNING("retry download");
                 download();
                 m_hpr->retryTimes++;
@@ -320,7 +322,7 @@ void Server::eventChanged(const std::shared_ptr<Event>& event)
             break;
         }
         if (m_hpr->upgrade.download != Upgrade::MTHD_SKIP) {
-            // wait(10);
+            wait(10);
             sendControlMessage(CTL_DOWNLOAD);
         }
         setState(MR_DISTRIBUTE);

@@ -50,6 +50,4 @@
 #define MIFSA_OTA_DOWNLOAD_KEEP_FILE_COUNT 2
 #define MIFSA_OTA_RETRY_TIMES 2
 
-#define MIFSA_OTA_SERVER_NAME "mifsa_ota_server"
-
 #endif // MIFSA_OTA_CORE_SETTING_H

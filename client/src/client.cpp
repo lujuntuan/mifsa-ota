@@ -89,6 +89,13 @@ Client::Client(int argc, char** argv)
     m_hpr->detail.domain.last = WR_OFFLINE;
     //
     loadInterface<ClientInterfaceAdapter>();
+    interface()->setCbControlMessage([this](const ControlMessage& controlMessage) {
+        processControlMessage(controlMessage);
+    });
+    interfaceMutex().lock();
+    interface()->checkControlMessageId = std::bind(&Client::checkControlMessageId, this, std::placeholders::_1);
+    interface()->checkDetailMessageId = std::bind(&Client::checkDetailMessageId, this, std::placeholders::_1);
+    interfaceMutex().unlock();
 }
 
 Client::~Client()
@@ -234,6 +241,9 @@ void Client::subscibeDetail(const DetailFunction& function)
         return;
     }
     m_hpr->detailFunction = function;
+    interface()->setCbDetailMessage([this](const DetailMessage& detailMessage) {
+        processDetailMessage(detailMessage);
+    });
 }
 
 void Client::postDetailAnswer(Answer answer)
@@ -247,6 +257,7 @@ void Client::postDetailAnswer(Answer answer)
 
 void Client::begin()
 {
+    ClientProxy::begin();
     m_hpr->replyControlTimer = createTimer(MIFSA_OTA_PROCESS_DOMAIN_TIME, true, std::bind(&Client::sendDomainMessage, this));
     m_hpr->replyControlTimer->start();
     sendDomainMessage();
@@ -254,6 +265,7 @@ void Client::begin()
 
 void Client::end()
 {
+    ClientProxy::end();
 }
 
 void Client::eventChanged(const std::shared_ptr<Event>& event)
@@ -547,12 +559,12 @@ bool Client::hasSubscibeDetail() const
     return false;
 }
 
-void Client::processControlMessage(ControlMessage&& controlMessage)
+void Client::processControlMessage(const ControlMessage& controlMessage)
 {
     this->postEvent(std::make_shared<ClientControlEvent>(std::move(controlMessage)));
 }
 
-void Client::processDetailMessage(DetailMessage&& detailMessage)
+void Client::processDetailMessage(const DetailMessage& detailMessage)
 {
     if (!m_hpr->detailFunction) {
         return;

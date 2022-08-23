@@ -15,18 +15,117 @@
 
 #include "mifsa/ota/client.h"
 #include <mifsa/base/thread.h>
-#include <mifsa_ota_idl/msg/command.hpp>
-#include <mifsa_ota_idl/msg/location.hpp>
-#include <mifsa_ota_idl/srv/nmea.hpp>
+#include <mifsa_ota_idl/msg/control_message.hpp>
+#include <mifsa_ota_idl/msg/detail_message.hpp>
+#include <mifsa_ota_idl/msg/domain_message.hpp>
 #include <rclcpp/rclcpp.hpp>
-
-using namespace mifsa_ota_idl;
 
 MIFSA_NAMESPACE_BEGIN
 
-int _time_out = 5000;
-
 namespace Ota {
+static Package _getPackage(const mifsa_ota_idl::msg::Package& t_package)
+{
+    Package package;
+    package.domain = t_package.domain;
+    package.part = t_package.part;
+    package.version = t_package.version;
+    package.meta = Variant::readJson(t_package.meta);
+    for (const auto& msg_file : t_package.files) {
+        File file;
+        file.domain = msg_file.domain;
+        file.name = msg_file.name;
+        file.url = msg_file.url;
+        file.size = msg_file.size;
+        file.md5 = msg_file.md5;
+        file.sha1 = msg_file.sha1;
+        file.sha256 = msg_file.sha256;
+        package.files.push_back(std::move(file));
+    }
+    return package;
+}
+
+static ControlMessage _getControlMessage(const mifsa_ota_idl::msg::ControlMessage::UniquePtr& t_controlMessage)
+{
+    ControlMessage controlMessage;
+    controlMessage.id = t_controlMessage->id;
+    controlMessage.control = (Control)t_controlMessage->control;
+    controlMessage.upgrade.id = t_controlMessage->upgrade.id;
+    controlMessage.upgrade.download = (Upgrade::Method)t_controlMessage->upgrade.download;
+    controlMessage.upgrade.deploy = (Upgrade::Method)t_controlMessage->upgrade.deploy;
+    controlMessage.upgrade.maintenance = t_controlMessage->upgrade.maintenance;
+    for (const auto& msg_package : t_controlMessage->upgrade.packages) {
+        const auto& package = _getPackage(msg_package);
+        controlMessage.upgrade.packages.push_back(std::move(package));
+    }
+    controlMessage.depends = t_controlMessage->depends;
+    return controlMessage;
+}
+
+static DetailMessage _getDetailMessage(const mifsa_ota_idl::msg::DetailMessage::UniquePtr& t_detailMessage)
+{
+    DetailMessage detailMessage;
+    detailMessage.id = (ServerState)t_detailMessage->id;
+    detailMessage.state = (ServerState)t_detailMessage->state;
+    detailMessage.last = (ServerState)t_detailMessage->last;
+    detailMessage.active = t_detailMessage->active;
+    detailMessage.error = t_detailMessage->error;
+    detailMessage.step = t_detailMessage->step;
+    detailMessage.progress = t_detailMessage->progress;
+    detailMessage.message = t_detailMessage->message;
+    for (const auto& msg_detail : t_detailMessage->details) {
+        Domain domain(msg_detail.domain.name, msg_detail.domain.guid);
+        domain.state = (ClientState)msg_detail.domain.state;
+        domain.last = (ClientState)msg_detail.domain.last;
+        domain.watcher = msg_detail.domain.watcher;
+        domain.error = msg_detail.domain.error;
+        domain.version = msg_detail.domain.version;
+        domain.attribute = Variant::readJson(msg_detail.domain.attribute);
+        domain.meta = Variant::readJson(msg_detail.domain.meta);
+        domain.progress = msg_detail.domain.progress;
+        domain.message = msg_detail.domain.message;
+        domain.answer = (Answer)msg_detail.domain.answer;
+        Detail detail(std::move(domain));
+        const auto& package = _getPackage(msg_detail.package);
+        detail.package = package;
+        for (const auto& msg_transfer : msg_detail.transfers) {
+            Transfer transfer;
+            transfer.domain = msg_transfer.domain;
+            transfer.name = msg_transfer.name;
+            transfer.progress = msg_transfer.progress;
+            transfer.speed = msg_transfer.speed;
+            transfer.total = msg_transfer.total;
+            transfer.current = msg_transfer.current;
+            transfer.pass = msg_transfer.pass;
+            transfer.left = msg_transfer.left;
+            detail.transfers.push_back(std::move(transfer));
+        }
+        detail.progress = msg_detail.progress;
+        if (msg_detail.deploy > 0) {
+            detail.deploy.start(Elapsed::current() - msg_detail.deploy);
+        }
+        detailMessage.details.push_back(std::move(detail));
+    }
+    return detailMessage;
+}
+
+static mifsa_ota_idl::msg::DomainMessage _getDomainMessage(const DomainMessage& domainMessage)
+{
+    mifsa_ota_idl::msg::DomainMessage t_domainMessage;
+    t_domainMessage.domain.name = domainMessage.domain.name;
+    t_domainMessage.domain.guid = domainMessage.domain.guid;
+    t_domainMessage.domain.state = domainMessage.domain.state;
+    t_domainMessage.domain.last = domainMessage.domain.last;
+    t_domainMessage.domain.watcher = domainMessage.domain.watcher;
+    t_domainMessage.domain.error = domainMessage.domain.error;
+    t_domainMessage.domain.version = domainMessage.domain.version;
+    t_domainMessage.domain.attribute = domainMessage.domain.attribute.toJson();
+    t_domainMessage.domain.meta = domainMessage.domain.meta.toJson();
+    t_domainMessage.domain.progress = domainMessage.domain.progress;
+    t_domainMessage.domain.message = domainMessage.domain.message;
+    t_domainMessage.domain.answer = domainMessage.domain.answer;
+    t_domainMessage.discovery = domainMessage.discovery;
+    return t_domainMessage;
+}
 
 class ClientInterfaceAdapter : public ClientInterface {
 public:
@@ -38,33 +137,26 @@ public:
             m_node = rclcpp::Node::make_shared("mifsa_ota_client");
             m_callbackGroup = m_node->create_callback_group(rclcpp::CallbackGroupType::Reentrant);
             auto qosConfig = rclcpp::QoS(rclcpp::KeepLast(10)).reliable();
-            m_locationSub = m_node->create_subscription<msg::Location>("/mifsa/ota/location", qosConfig, [this](msg::Location::UniquePtr ros_location) {
-                if (cbLocation) {
-                    Location location;
-                    location.size = ros_location->size;
-                    location.flags = ros_location->flags;
-                    location.latitude = ros_location->latitude;
-                    location.longitude = ros_location->longitude;
-                    location.altitude = ros_location->altitude;
-                    location.speed = ros_location->speed;
-                    location.bearing = ros_location->bearing;
-                    location.accuracy = ros_location->accuracy;
-                    location.timestamp = ros_location->timestamp;
-                    location.data = ros_location->data;
-                    cbLocation(location);
-                }
-            });
-            m_commandPub = m_node->create_publisher<msg::Command>("/mifsa/ota/command", qosConfig);
-            m_nmeaClient = m_node->create_client<srv::Nmea>("mifsa_ota_server_nmea", ::rmw_qos_profile_default, m_callbackGroup);
-            m_serverIsReady = m_nmeaClient->service_is_ready();
-            if (m_serverIsReady) {
-                cbConnected(m_serverIsReady);
+            m_control = m_node->create_subscription<mifsa_ota_idl::msg::ControlMessage>("/mifsa/ota/control", qosConfig,
+                [this](mifsa_ota_idl::msg::ControlMessage::UniquePtr t_controlMessage) {
+                    if (checkControlMessageId && !checkControlMessageId(t_controlMessage->id)) {
+                        return;
+                    }
+                    const auto& controlMessage = _getControlMessage(t_controlMessage);
+                    if (m_cbControlMessage) {
+                        m_cbControlMessage(controlMessage);
+                    }
+                });
+            m_domain = m_node->create_publisher<mifsa_ota_idl::msg::DomainMessage>("/mifsa/ota/domain", qosConfig);
+            m_connected = connected();
+            if (m_connected) {
+                cbConnected(m_connected);
             }
             m_timer = m_node->create_wall_timer(std::chrono::milliseconds(500), [this]() {
-                bool ready = m_nmeaClient->service_is_ready();
-                if (m_serverIsReady != ready) {
-                    m_serverIsReady = ready;
-                    cbConnected(m_serverIsReady);
+                bool isConnected = connected();
+                if (m_connected != isConnected) {
+                    m_connected = isConnected;
+                    cbConnected(m_connected);
                 }
             });
             sema.reset();
@@ -79,52 +171,59 @@ public:
         rclcpp::shutdown();
         m_thread.stop();
     }
+    virtual void onStarted() override
+    {
+    }
+    virtual void onStoped() override
+    {
+    }
     virtual std::string version() override
     {
         return MIFSA_OTA_VERSION;
     }
     virtual bool connected() override
     {
-        return m_nmeaClient->service_is_ready();
+        return m_control->get_publisher_count() > 0;
     }
-    virtual std::string getNmea() override
+    virtual void setCbControlMessage(CbControlMessage cb) override
     {
-        auto ros_nmeaReq = std::make_shared<srv::Nmea::Request>();
-        ros_nmeaReq->type = srv::Nmea::Request::QUERY_NMEA;
-        auto result = m_nmeaClient->async_send_request(ros_nmeaReq);
-        auto status = result.wait_for(std::chrono::milliseconds(_time_out));
-        if (status == std::future_status::ready) {
-            return result.get()->data;
-        } else {
-            LOG_WARNING("invoke failed");
-            return "";
+        m_cbControlMessage = cb;
+    }
+    virtual void setCbDetailMessage(CbDetailMessage cb) override
+    {
+        m_cbDetailMessage = cb;
+        auto qosConfig = rclcpp::QoS(rclcpp::KeepLast(10)).reliable();
+        m_detail = m_node->create_subscription<mifsa_ota_idl::msg::DetailMessage>("/mifsa/ota/detail", qosConfig,
+            [this](mifsa_ota_idl::msg::DetailMessage::UniquePtr t_detailMessage) {
+                if (checkDetailMessageId && !checkDetailMessageId(t_detailMessage->id)) {
+                    return;
+                }
+                const auto& detailMessage = _getDetailMessage(t_detailMessage);
+                if (m_cbDetailMessage) {
+                    m_cbDetailMessage(detailMessage);
+                }
+            });
+    }
+    virtual bool sendDomain(const DomainMessage& domainMessage) override
+    {
+        if (!connected()) {
+            return false;
         }
-    }
-    virtual void startNavigation(const CbLocation& cb) override
-    {
-        cbLocation = cb;
-        msg::Command ros_command;
-        ros_command.type = msg::Command::START_NAVIGATION;
-        m_commandPub->publish(ros_command);
-    }
-    virtual void stopNavigation() override
-    {
-        msg::Command ros_command;
-        ros_command.type = msg::Command::STOP_NAVIGATION;
-        m_commandPub->publish(ros_command);
+        m_domain->publish(_getDomainMessage(domainMessage));
+        return true;
     }
 
 private:
     Thread m_thread;
     rclcpp::Node::SharedPtr m_node;
     rclcpp::CallbackGroup::SharedPtr m_callbackGroup;
-    rclcpp::Subscription<msg::Location>::SharedPtr m_locationSub;
-    rclcpp::Publisher<msg::Command>::SharedPtr m_commandPub;
-    rclcpp::Client<srv::Nmea>::SharedPtr m_nmeaClient;
+    rclcpp::Subscription<mifsa_ota_idl::msg::ControlMessage>::SharedPtr m_control;
+    rclcpp::Subscription<mifsa_ota_idl::msg::DetailMessage>::SharedPtr m_detail;
+    rclcpp::Publisher<mifsa_ota_idl::msg::DomainMessage>::SharedPtr m_domain;
     rclcpp::TimerBase::SharedPtr m_timer;
-    bool m_serverIsReady = false;
-    //
-    CbLocation cbLocation;
+    bool m_connected = false;
+    CbControlMessage m_cbControlMessage;
+    CbDetailMessage m_cbDetailMessage;
 };
 
 }

@@ -35,119 +35,116 @@ using namespace ipc::fdbus;
 
 MIFSA_NAMESPACE_BEGIN
 
-int _time_out = 5000;
-
 namespace Ota {
-static Package _getPackage(const mifsa::ota::pb::Package& pb_package)
+static Package _getPackage(const mifsa_ota_idl::Package& t_package)
 {
     Package package;
-    package.domain = pb_package.domain();
-    package.part = pb_package.part();
-    package.version = pb_package.version();
-    package.meta = Variant::readJson(pb_package.meta());
-    for (int i = 0; i < pb_package.files_size(); i++) {
+    package.domain = t_package.domain();
+    package.part = t_package.part();
+    package.version = t_package.version();
+    package.meta = Variant::readJson(t_package.meta());
+    for (int i = 0; i < t_package.files_size(); i++) {
         File file;
-        const auto& pb_file = pb_package.files(i);
-        file.domain = pb_file.domain();
-        file.name = pb_file.name();
-        file.url = pb_file.url();
-        file.size = pb_file.size();
-        file.md5 = pb_file.md5();
-        file.sha1 = pb_file.sha1();
-        file.sha256 = pb_file.sha256();
+        const auto& t_file = t_package.files(i);
+        file.domain = t_file.domain();
+        file.name = t_file.name();
+        file.url = t_file.url();
+        file.size = t_file.size();
+        file.md5 = t_file.md5();
+        file.sha1 = t_file.sha1();
+        file.sha256 = t_file.sha256();
         package.files.push_back(std::move(file));
     }
     return package;
 }
 
-static ControlMessage _getControlMessage(const mifsa::ota::pb::ControlMessage& pb_controlMessage)
+static ControlMessage _getControlMessage(const mifsa_ota_idl::ControlMessage& t_controlMessage)
 {
-    uint32_t id = pb_controlMessage.id();
-    Control control = (Control)pb_controlMessage.control();
-    Upgrade upgrade;
-    upgrade.id = pb_controlMessage.upgrade().id();
-    upgrade.download = (Upgrade::Method)pb_controlMessage.upgrade().download();
-    upgrade.deploy = (Upgrade::Method)pb_controlMessage.upgrade().deploy();
-    upgrade.maintenance = pb_controlMessage.upgrade().maintenance();
-    for (int i = 0; i < pb_controlMessage.upgrade().packages_size(); i++) {
-        const auto& pb_package = pb_controlMessage.upgrade().packages(i);
-        const Package& package = _getPackage(pb_package);
-        upgrade.packages.push_back(std::move(package));
+    ControlMessage controlMessage;
+    controlMessage.id = t_controlMessage.id();
+    controlMessage.control = (Control)t_controlMessage.control();
+    controlMessage.upgrade.id = t_controlMessage.upgrade().id();
+    controlMessage.upgrade.download = (Upgrade::Method)t_controlMessage.upgrade().download();
+    controlMessage.upgrade.deploy = (Upgrade::Method)t_controlMessage.upgrade().deploy();
+    controlMessage.upgrade.maintenance = t_controlMessage.upgrade().maintenance();
+    for (int i = 0; i < t_controlMessage.upgrade().packages_size(); i++) {
+        const auto& t_package = t_controlMessage.upgrade().packages(i);
+        const Package& package = _getPackage(t_package);
+        controlMessage.upgrade.packages.push_back(std::move(package));
     }
-    Depends depends;
-    for (int i = 0; i < pb_controlMessage.depends_size(); i++) {
-        const auto& pb_name = pb_controlMessage.depends(i);
-        depends.push_back(std::move(pb_name));
+    for (int i = 0; i < t_controlMessage.depends_size(); i++) {
+        const auto& t_name = t_controlMessage.depends(i);
+        controlMessage.depends.push_back(std::move(t_name));
     }
-    return ControlMessage(id, control, std::move(upgrade), std::move(depends));
+    return controlMessage;
 }
 
-static DetailMessage _getDetailMessage(const mifsa::ota::pb::DetailMessage& pb_detailMessage)
+static DetailMessage _getDetailMessage(const mifsa_ota_idl::DetailMessage& t_detailMessage)
 {
-    uint32_t id = pb_detailMessage.id();
-    ServerState state = (ServerState)pb_detailMessage.state();
-    ServerState last = (ServerState)pb_detailMessage.last();
-    bool active = pb_detailMessage.active();
-    int error = pb_detailMessage.error();
-    float step = pb_detailMessage.step();
-    float progress = pb_detailMessage.progress();
-    const std::string& message = pb_detailMessage.message();
-    Details details;
-    for (int i = 0; i < pb_detailMessage.details_size(); i++) {
-        const auto& pb_detail = pb_detailMessage.details(i);
-        Domain domain(pb_detail.domain().name(), pb_detail.domain().guid());
-        domain.state = (ClientState)pb_detail.domain().state();
-        domain.last = (ClientState)pb_detail.domain().last();
-        domain.watcher = pb_detail.domain().watcher();
-        domain.error = pb_detail.domain().error();
-        domain.version = pb_detail.domain().version();
-        domain.attribute = Variant::readJson(pb_detail.domain().attribute());
-        domain.meta = Variant::readJson(pb_detail.domain().meta());
-        domain.progress = pb_detail.domain().progress();
-        domain.message = pb_detail.domain().message();
-        domain.answer = (Answer)pb_detail.domain().answer();
+    DetailMessage detailMessage;
+    detailMessage.id = t_detailMessage.id();
+    detailMessage.state = (ServerState)t_detailMessage.state();
+    detailMessage.last = (ServerState)t_detailMessage.last();
+    detailMessage.active = t_detailMessage.active();
+    detailMessage.error = t_detailMessage.error();
+    detailMessage.step = t_detailMessage.step();
+    detailMessage.progress = t_detailMessage.progress();
+    detailMessage.message = t_detailMessage.message();
+    for (int i = 0; i < t_detailMessage.details_size(); i++) {
+        const auto& t_detail = t_detailMessage.details(i);
+        Domain domain(t_detail.domain().name(), t_detail.domain().guid());
+        domain.state = (ClientState)t_detail.domain().state();
+        domain.last = (ClientState)t_detail.domain().last();
+        domain.watcher = t_detail.domain().watcher();
+        domain.error = t_detail.domain().error();
+        domain.version = t_detail.domain().version();
+        domain.attribute = Variant::readJson(t_detail.domain().attribute());
+        domain.meta = Variant::readJson(t_detail.domain().meta());
+        domain.progress = t_detail.domain().progress();
+        domain.message = t_detail.domain().message();
+        domain.answer = (Answer)t_detail.domain().answer();
         Detail detail(std::move(domain));
-        const Package& package = _getPackage(pb_detail.package());
+        const Package& package = _getPackage(t_detail.package());
         detail.package = package;
-        for (int j = 0; j < pb_detail.transfers_size(); j++) {
-            const auto& pb_transfer = pb_detail.transfers(j);
+        for (int j = 0; j < t_detail.transfers_size(); j++) {
+            const auto& t_transfer = t_detail.transfers(j);
             Transfer transfer;
-            transfer.domain = pb_transfer.domain();
-            transfer.name = pb_transfer.name();
-            transfer.progress = pb_transfer.progress();
-            transfer.speed = pb_transfer.speed();
-            transfer.total = pb_transfer.total();
-            transfer.current = pb_transfer.current();
-            transfer.pass = pb_transfer.pass();
-            transfer.left = pb_transfer.left();
+            transfer.domain = t_transfer.domain();
+            transfer.name = t_transfer.name();
+            transfer.progress = t_transfer.progress();
+            transfer.speed = t_transfer.speed();
+            transfer.total = t_transfer.total();
+            transfer.current = t_transfer.current();
+            transfer.pass = t_transfer.pass();
+            transfer.left = t_transfer.left();
             detail.transfers.push_back(std::move(transfer));
         }
-        detail.progress = pb_detail.progress();
-        if (pb_detail.deploy() > 0) {
-            detail.deploy.start(Elapsed::current() - pb_detail.deploy());
+        detail.progress = t_detail.progress();
+        if (t_detail.deploy() > 0) {
+            detail.deploy.start(Elapsed::current() - t_detail.deploy());
         }
-        details.push_back(std::move(detail));
+        detailMessage.details.push_back(std::move(detail));
     }
-    return DetailMessage(id, state, last, active, error, step, progress, std::move(message), std::move(details));
+    return detailMessage;
 }
 
-static mifsa::ota::pb::DomainMessage _getDomainMessage(const DomainMessage& domainMessage)
+static mifsa_ota_idl::DomainMessage _getDomainMessage(const DomainMessage& domainMessage)
 {
-    mifsa::ota::pb::DomainMessage pb_domainMessage;
-    pb_domainMessage.mutable_domain()->set_name(domainMessage.domain.name);
-    pb_domainMessage.mutable_domain()->set_guid(domainMessage.domain.guid);
-    pb_domainMessage.mutable_domain()->set_state((mifsa::ota::pb::Domain_ClientState)domainMessage.domain.state);
-    pb_domainMessage.mutable_domain()->set_last((mifsa::ota::pb::Domain_ClientState)domainMessage.domain.last);
-    pb_domainMessage.mutable_domain()->set_watcher(domainMessage.domain.watcher);
-    pb_domainMessage.mutable_domain()->set_error(domainMessage.domain.error);
-    pb_domainMessage.mutable_domain()->set_version(domainMessage.domain.version);
-    pb_domainMessage.mutable_domain()->set_attribute(domainMessage.domain.attribute.toJson());
-    pb_domainMessage.mutable_domain()->set_meta(domainMessage.domain.meta.toJson());
-    pb_domainMessage.mutable_domain()->set_progress(domainMessage.domain.progress);
-    pb_domainMessage.mutable_domain()->set_message(domainMessage.domain.message);
-    pb_domainMessage.mutable_domain()->set_answer((mifsa::ota::pb::Domain_Answer)domainMessage.domain.answer);
-    pb_domainMessage.set_discovery(domainMessage.discovery);
-    return pb_domainMessage;
+    mifsa_ota_idl::DomainMessage t_domainMessage;
+    t_domainMessage.mutable_domain()->set_name(domainMessage.domain.name);
+    t_domainMessage.mutable_domain()->set_guid(domainMessage.domain.guid);
+    t_domainMessage.mutable_domain()->set_state((mifsa_ota_idl::Domain_ClientState)domainMessage.domain.state);
+    t_domainMessage.mutable_domain()->set_last((mifsa_ota_idl::Domain_ClientState)domainMessage.domain.last);
+    t_domainMessage.mutable_domain()->set_watcher(domainMessage.domain.watcher);
+    t_domainMessage.mutable_domain()->set_error(domainMessage.domain.error);
+    t_domainMessage.mutable_domain()->set_version(domainMessage.domain.version);
+    t_domainMessage.mutable_domain()->set_attribute(domainMessage.domain.attribute.toJson());
+    t_domainMessage.mutable_domain()->set_meta(domainMessage.domain.meta.toJson());
+    t_domainMessage.mutable_domain()->set_progress(domainMessage.domain.progress);
+    t_domainMessage.mutable_domain()->set_message(domainMessage.domain.message);
+    t_domainMessage.mutable_domain()->set_answer((mifsa_ota_idl::Domain_Answer)domainMessage.domain.answer);
+    t_domainMessage.set_discovery(domainMessage.discovery);
+    return t_domainMessage;
 }
 
 class ClientInterfaceAdapter : public ClientInterface, protected CBaseClient {
@@ -165,6 +162,12 @@ public:
         m_worker.exit();
         CBaseClient::disconnect();
     }
+    virtual void onStarted() override
+    {
+    }
+    virtual void onStoped() override
+    {
+    }
     virtual std::string version() override
     {
         return MIFSA_OTA_VERSION;
@@ -180,15 +183,20 @@ public:
     virtual void setCbDetailMessage(CbDetailMessage cb) override
     {
         m_cbDetailMessage = cb;
+        CFdbMsgSubscribeList subList;
+        if (mifsa_ota_client->hasSubscibeDetail()) {
+            CBaseClient::addNotifyItem(subList, mifsa_ota_idl::TP_DETAIL_MSG);
+        }
+        CBaseClient::subscribe(subList);
     }
     virtual bool sendDomain(const DomainMessage& domainMessage) override
     {
-        if (!CBaseClient::connected()) {
+        if (!ClientInterfaceAdapter::connected()) {
             return false;
         }
-        mifsa::ota::pb::DomainMessage pb_domainMessage = _getDomainMessage(domainMessage);
-        CFdbProtoMsgBuilder builder(pb_domainMessage);
-        CBaseClient::invoke(mifsa::ota::pb::TP_DOMAIN_MSG, builder);
+        mifsa_ota_idl::DomainMessage t_domainMessage = _getDomainMessage(domainMessage);
+        CFdbProtoMsgBuilder builder(t_domainMessage);
+        CBaseClient::invoke(mifsa_ota_idl::TP_DOMAIN_MSG, builder);
         return true;
     }
 
@@ -196,11 +204,12 @@ protected:
     void onOnline(FDBUS_ONLINE_ARG_TYPE) override
     {
         CFdbMsgSubscribeList subList;
-        CBaseClient::addNotifyItem(subList, mifsa::ota::pb::TP_CONTROL_MSG);
+        CBaseClient::addNotifyItem(subList, mifsa_ota_idl::TP_CONTROL_MSG);
         if (mifsa_ota_client->hasSubscibeDetail()) {
-            CBaseClient::addNotifyItem(subList, mifsa::ota::pb::TP_DETAIL_MSG);
+            CBaseClient::addNotifyItem(subList, mifsa_ota_idl::TP_DETAIL_MSG);
         }
         CBaseClient::subscribe(subList);
+        cbConnected(true);
     }
     void onOffline(FDBUS_ONLINE_ARG_TYPE) override
     {
@@ -212,26 +221,39 @@ protected:
         if (!msgData) {
             return;
         }
-        if (msgData->code() == mifsa::ota::pb::TP_CONTROL_MSG) {
-            mifsa::ota::pb::ControlMessage pb_controlMessage;
+        if (msgData->code() == mifsa_ota_idl::TP_CONTROL_MSG) {
+            mifsa_ota_idl::ControlMessage t_controlMessage;
             if (msgData->getPayloadSize() > 0) {
-                CFdbProtoMsgParser parser(pb_controlMessage);
+                CFdbProtoMsgParser parser(t_controlMessage);
                 if (!msgData->deserialize(parser)) {
                     LOG_WARNING("deserialize msg error");
                     return;
                 }
             }
-            mifsa_ota_client->processControlMessage(_getControlMessage(pb_controlMessage));
-        } else if (msgData->code() == mifsa::ota::pb::TP_DETAIL_MSG) {
-            mifsa::ota::pb::DetailMessage pb_detailMessage;
+            if (checkControlMessageId && !checkControlMessageId(t_controlMessage.id())) {
+                return;
+            }
+            const auto& controlMessage = _getControlMessage(t_controlMessage);
+            if (m_cbControlMessage) {
+                m_cbControlMessage(controlMessage);
+            }
+        } else if (msgData->code() == mifsa_ota_idl::TP_DETAIL_MSG) {
+            mifsa_ota_idl::DetailMessage t_detailMessage;
+
             if (msgData->getPayloadSize() > 0) {
-                CFdbProtoMsgParser parser(pb_detailMessage);
+                CFdbProtoMsgParser parser(t_detailMessage);
                 if (!msgData->deserialize(parser)) {
                     LOG_WARNING("deserialize msg error");
                     return;
                 }
             }
-            mifsa_ota_client->processDetailMessage(_getDetailMessage(pb_detailMessage));
+            if (checkDetailMessageId && !checkDetailMessageId(t_detailMessage.id())) {
+                return;
+            }
+            const auto& detailMessage = _getDetailMessage(t_detailMessage);
+            if (m_cbDetailMessage) {
+                m_cbDetailMessage(detailMessage);
+            }
         }
     }
 

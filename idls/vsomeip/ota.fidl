@@ -1,6 +1,6 @@
-package commonapi.mifsa.ota
+package commonapi
 
-interface interfaces {
+interface mifsa_ota_idl {
     version { major 1 minor 0 }
     method invokeDomainMessage fireAndForget {
         in {

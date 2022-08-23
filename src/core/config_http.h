@@ -39,7 +39,7 @@ namespace Core {
         }
 #ifdef MIFSA_OTA_USE_HTTPS
         if (config.value("web_ca_cert_path").isValid()) {
-            client.set_ca_cert_path(config.value("web_ca_cert_path").toStringCStr());
+            client.set_ca_cert_path(config.value("web_ca_cert_path").toCString());
             client.enable_server_certificate_verification(true);
         } else {
             client.enable_server_certificate_verification(false);

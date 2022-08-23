@@ -176,9 +176,9 @@ void WebQueue::eventChanged(const std::shared_ptr<Event>& event)
         m_hpr->workThread.start(std::bind(&WebQueue::distribute, this, id, files));
         bool canPull = false;
         while (m_hpr->workThread.isRunning() && !isReadyToQuit()) {
-            // wait(10);
+            wait(10);
             if (m_hpr->distributeHandle) {
-                // wait(10);
+                wait(10);
                 canPull = true;
                 break;
             }

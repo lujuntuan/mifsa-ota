@@ -25,7 +25,7 @@ target_link_libraries(
     )
 install(
     TARGETS
-    ${SUB_PROJECT_NAME}
+    ${PROJECT_NAME}
     RUNTIME
     DESTINATION
     ${CMAKE_INSTALL_LIBDIR}

@@ -25,9 +25,14 @@ class ClientInterface : public ClientInterfaceBase {
 public:
     using CbControlMessage = std::function<void(const ControlMessage& controlMessage)>;
     using CbDetailMessage = std::function<void(const DetailMessage& detailMessage)>;
+    using CbCheckId = std::function<bool(uint32_t id)>;
     virtual void setCbControlMessage(CbControlMessage cb) = 0;
     virtual void setCbDetailMessage(CbDetailMessage cb) = 0;
     virtual bool sendDomain(const DomainMessage& domainMessage) = 0;
+
+public:
+    CbCheckId checkControlMessageId;
+    CbCheckId checkDetailMessageId;
 };
 }
 

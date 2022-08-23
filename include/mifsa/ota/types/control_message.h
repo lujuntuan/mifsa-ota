@@ -34,9 +34,6 @@ struct ControlMessage final {
     Control control = CTL_UNKNOWN;
     Upgrade upgrade;
     Depends depends;
-
-public:
-    MIFSA_EXPORT friend std::ostream& operator<<(std::ostream& ostream, const ControlMessage& controlMessage) noexcept;
 };
 }
 VARIANT_DECLARE_TYPE(Ota::ControlMessage, ota_control_message);
