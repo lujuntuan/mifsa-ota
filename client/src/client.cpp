@@ -74,7 +74,7 @@ Client::Client(int argc, char** argv)
     if (config().value("download_dir").isValid()) {
         m_hpr->downloadDir = config().value("download_dir").toString();
     } else {
-        m_hpr->downloadDir = Utils::getTempDir() + "/MIFSA_client_tmp";
+        m_hpr->downloadDir = Utils::getTempDir() + "/mifsa_ota_client_downloads";
     }
     if (ClientHelper::_hasRegister) {
         m_hpr->name = ClientHelper::_clientName;

@@ -51,7 +51,7 @@ WebQueue::WebQueue()
     if (mifsa_ota_server->config().value("download_dir").isValid()) {
         m_hpr->downloadDir = mifsa_ota_server->config().value("download_dir").toString();
     } else {
-        m_hpr->downloadDir = Utils::getTempDir() + "/mifsa_server_tmp";
+        m_hpr->downloadDir = Utils::getTempDir() + "/mifsa_ota_server_downloads";
     }
     if (mifsa_ota_server->config().value("distribute_url").isValid()) {
         m_hpr->distributeUrl = mifsa_ota_server->config().value("distribute_url").toString();
