@@ -16,4 +16,6 @@
 #include "client_interface_vsomeip.hpp"
 #elif defined(MIFSA_SUPPORT_FDBUS)
 #include "client_interface_fdbus.hpp"
+#else
+#include "client_interface_custom.hpp"
 #endif

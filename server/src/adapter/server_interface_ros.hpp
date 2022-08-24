@@ -13,7 +13,7 @@
 #ifndef MIFSA_OTA_SERVER_INTERFACE_ROS_H
 #define MIFSA_OTA_SERVER_INTERFACE_ROS_H
 
-#include "server.h"
+#include "mifsa/ota/server_interface.h"
 #include <mifsa/base/semaphore.h>
 #include <mifsa/base/thread.h>
 #include <mifsa_ota_idl/msg/control_message.hpp>

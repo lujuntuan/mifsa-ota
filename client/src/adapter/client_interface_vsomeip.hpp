@@ -13,7 +13,7 @@
 #ifndef MIFSA_OTA_CLIENT_INTERFACE_VSOMEIP_H
 #define MIFSA_OTA_CLIENT_INTERFACE_VSOMEIP_H
 
-#include "mifsa/ota/client.h"
+#include "mifsa/ota/client_interface.h"
 #include <CommonAPI/CommonAPI.hpp>
 #include <mifsa/utils/dir.h>
 #include <mifsa/utils/host.h>

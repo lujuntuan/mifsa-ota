@@ -13,7 +13,7 @@
 #ifndef MIFSA_OTA_CLIENT_INTERFACE_ROS_H
 #define MIFSA_OTA_CLIENT_INTERFACE_ROS_H
 
-#include "mifsa/ota/client.h"
+#include "mifsa/ota/client_interface.h"
 #include <mifsa/base/thread.h>
 #include <mifsa_ota_idl/msg/control_message.hpp>
 #include <mifsa_ota_idl/msg/detail_message.hpp>

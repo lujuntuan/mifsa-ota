@@ -30,7 +30,7 @@ using namespace ipc::fdbus;
 #include <common_base/fdbus.h>
 #endif
 
-#include "mifsa/ota/client.h"
+#include "mifsa/ota/client_interface.h"
 #include "mifsa/ota/idl/fdbus/ota.pb.h"
 
 MIFSA_NAMESPACE_BEGIN
@@ -184,9 +184,7 @@ public:
     {
         m_cbDetailMessage = cb;
         CFdbMsgSubscribeList subList;
-        if (mifsa_ota_client->hasSubscibeDetail()) {
-            CBaseClient::addNotifyItem(subList, mifsa_ota_idl::TP_DETAIL_MSG);
-        }
+        CBaseClient::addNotifyItem(subList, mifsa_ota_idl::TP_DETAIL_MSG);
         CBaseClient::subscribe(subList);
     }
     virtual bool sendDomain(const DomainMessage& domainMessage) override
@@ -205,7 +203,7 @@ protected:
     {
         CFdbMsgSubscribeList subList;
         CBaseClient::addNotifyItem(subList, mifsa_ota_idl::TP_CONTROL_MSG);
-        if (mifsa_ota_client->hasSubscibeDetail()) {
+        if (m_cbDetailMessage) {
             CBaseClient::addNotifyItem(subList, mifsa_ota_idl::TP_DETAIL_MSG);
         }
         CBaseClient::subscribe(subList);

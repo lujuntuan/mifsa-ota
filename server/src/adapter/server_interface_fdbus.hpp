@@ -31,7 +31,7 @@ using namespace ipc::fdbus;
 #endif
 
 #include "mifsa/ota/idl/fdbus/ota.pb.h"
-#include "server.h"
+#include "mifsa/ota/server_interface.h"
 #include <mifsa/base/thread.h>
 
 MIFSA_NAMESPACE_BEGIN
