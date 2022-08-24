@@ -7,7 +7,7 @@
     "web_proxy_url":"http://xxx",
     "web_proxy_username":"root",
     "web_proxy_password":"123",
-    "web_ca_cert_path":"/usr/share/dcus/ssl/local/local-ca.crt",
+    "web_ca_cert_path":"/usr/share/mifsa-ota/ssl/local/local-ca.crt",
     "net_interface":"eth0",
-    "download_dir":"/tmp/dcus_client"
+    "download_dir":"/tmp/mifsa-ota-client"
 }

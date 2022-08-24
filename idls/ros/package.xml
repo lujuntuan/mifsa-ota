@@ -3,7 +3,7 @@
 <package format="3">
   <name>mifsa_ota_idl</name>
   <description>mifsa_ota_idl</description>
-  <version>3.0.0</version>
+  <version>1.0.0</version>
   <maintainer email="931852884@qq.com">lujuntuan</maintainer>
   <license>MIT</license>
   <buildtool_depend>ament_cmake</buildtool_depend>

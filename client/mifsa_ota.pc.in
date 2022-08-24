@@ -11,4 +11,4 @@ Version: @PROJECT_VERSION@
 Cflags: -I${includedir}
 Libs: -L${libdir} -l@SUB_PROJECT_NAME@
 
-Requires: mifsa_base >= 3.0.0
+Requires: mifsa_base >= 1.0.0

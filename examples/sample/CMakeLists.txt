@@ -1,9 +1,9 @@
 #*********************************************************************************
-#  *Copyright(C): Juntuan.Lu 2021
+#  *Copyright(C): Juntuan.Lu, 2020-2030, All rights reserved.
 #  *Author:  Juntuan.Lu
 #  *Version: 1.0
 #  *Date:  2022/04/01
-#  *Phone: 15397182986
+#  *Email: 931852884@qq.com
 #  *Description:
 #  *Others:
 #  *Function List:
@@ -19,7 +19,6 @@ add_executable(
 target_link_libraries(
     ${PROJECT_NAME}
     PRIVATE
-    mifsa_base
     mifsa_${MIFSA_MODULE_TYPE}
     )
 install(
@@ -27,7 +26,7 @@ install(
     ${PROJECT_NAME}
     RUNTIME
     DESTINATION
-    ${CMAKE_INSTALL_LIBDIR}
+    ${CMAKE_INSTALL_BINDIR}
     )
 
 if(LINUX)
@@ -50,6 +49,6 @@ if(LINUX)
         FILES
         ${SAMPLE_SCRIPTS}
         DESTINATION
-        share/${CMAKE_INSTALL_BINDIR}
+        ${CMAKE_INSTALL_BINDIR}
         )
 endif()

@@ -19,7 +19,7 @@ using namespace Mifsa;
 int main(int argc, char* argv[])
 {
     Ota::Client client(argc, argv);
-    // dcus_client_engine->setMeta({ { "max_deploy_time", 8000 } });
+    // client.setMeta({ { "max_deploy_time", 8000 } });
     client.setAttribute({ { "hw_addr", "abcdefg" } });
     client.setVersion("1.0.0");
     client.subscibeDeploy(

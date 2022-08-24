@@ -321,7 +321,7 @@ namespace Core {
                             return;
                         }
                         // statusHelper.throwError(115); //!!bug todo!!
-                        // LOG_WARNING("not finished", " (" + helper->fileName + ")");
+                        LOG_WARNING("not finished", " (" + helper->fileName + ")");
                     }
                 }
                 if (helper->wfile.is_open()) {

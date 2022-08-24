@@ -1,10 +1,10 @@
 #!/bin/sh
 #*********************************************************************************
-#  *Copyright(C): Juntuan.Lu 2021
+#  *Copyright(C): Juntuan.Lu, 2020-2030, All rights reserved.
 #  *Author:  Juntuan.Lu
 #  *Version: 1.0
 #  *Date:  2022/04/01
-#  *Phone: 15397182986
+#  *Email: 931852884@qq.com
 #  *Description:
 #  *Others:
 #  *Function List:
@@ -40,7 +40,7 @@ do
     esac
 done
 
-echo "Run DCus test..."
+echo "Run test..."
 export LD_LIBRARY_PATH=$MIFSA_OTA_PART_LIBDIR:$LD_LIBRARY_PATH
 for i in $(seq 1 $MIFSA_OTA_TEST_COUNT)
 do

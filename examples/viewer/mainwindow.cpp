@@ -1,3 +1,15 @@
+/*********************************************************************************
+ *Copyright(C): Juntuan.Lu, 2020-2030, All rights reserved.
+ *Author:  Juntuan.Lu
+ *Version: 1.0
+ *Date:  2022/04/01
+ *Email: 931852884@qq.com
+ *Description:
+ *Others:
+ *Function List:
+ *History:
+ **********************************************************************************/
+
 #include "mainwindow.h"
 #include <QAbstractButton>
 #include <QClipboard>
@@ -209,7 +221,13 @@ void MainWindow::processDetail(const Mifsa::Ota::DetailMessage& detailMessage, b
         }
     }
     //-------------update and create
+    uint32_t totalSpeed = 0;
     for (const auto& d : detailMessage.details) {
+        if (detailMessage.state == Mifsa::Ota::MR_DOWNLOAD || detailMessage.state == Mifsa::Ota::MR_DISTRIBUTE) {
+            for (const auto& file : d.transfers) {
+                totalSpeed += file.speed;
+            }
+        }
         QTreeWidgetItem* item = nullptr;
         for (int i = 0; i < ui->treeWidget_list->topLevelItemCount(); i++) {
             auto p = ui->treeWidget_list->topLevelItem(i);
@@ -331,6 +349,14 @@ void MainWindow::processDetail(const Mifsa::Ota::DetailMessage& detailMessage, b
             m_acceptBtn->hide();
             m_rejectBtn->hide();
             m_messageTimer->stop();
+        }
+    }
+    if (detailMessage.state == Mifsa::Ota::MR_DOWNLOAD || detailMessage.state == Mifsa::Ota::MR_DISTRIBUTE) {
+        QString totalSpeedStr = QString::fromStdString(Mifsa::Ota::File::getSizeStr(totalSpeed)) + "/S";
+        if (detailMessage.state == Mifsa::Ota::MR_DOWNLOAD) {
+            m_messageLabel->setText("Download Speed: " + totalSpeedStr);
+        } else {
+            m_messageLabel->setText("Distribute Speed: " + totalSpeedStr);
         }
     }
 }
