@@ -39,6 +39,7 @@ struct ServerHelper {
     bool hasDeployBreaked = false;
     bool hasNewId = false;
     bool cancelResume = false;
+    bool printInfo = false;
     ServerState state = MR_OFFLINE;
     ServerState lastState = MR_OFFLINE;
     ServerState cacheState = MR_UNKNOWN;
@@ -72,6 +73,7 @@ struct ServerHelper {
     const Application::Arg argTenant { "t", "tenant", " tenant name", "DEFAULT" };
     const Application::Arg argId { "i", "id", " id name", "123456789" };
     const Application::Arg argToken { "k", "token", " token number", "" };
+    const Application::Arg argInfo { "o", "info", " print info" };
 };
 
 Server::Server(int argc, char** argv)
@@ -80,7 +82,7 @@ Server::Server(int argc, char** argv)
     setInstance(this);
     MIFSA_HELPER_CREATE(m_hpr);
     //
-    parserArgs({ m_hpr->argVersion, m_hpr->argUrl, m_hpr->argTenant, m_hpr->argId, m_hpr->argToken });
+    parserArgs({ m_hpr->argVersion, m_hpr->argUrl, m_hpr->argTenant, m_hpr->argId, m_hpr->argToken, m_hpr->argInfo });
     if (getArgValue(m_hpr->argVersion).toBool()) {
         LOG_DEBUG(MIFSA_OTA_VERSION);
         std::exit(0);
@@ -94,6 +96,10 @@ Server::Server(int argc, char** argv)
         return;
     }
     m_hpr->domainsConfig = readConfig("mifsa_ota_domains.json");
+    Variant printInfo = getArgValue(m_hpr->argInfo, "print_info");
+    if (printInfo.isValid()) {
+        m_hpr->printInfo = true;
+    }
     Variant webUrl = getArgValue(m_hpr->argUrl, "web_url");
     Variant tenant = getArgValue(m_hpr->argTenant, "tenant");
     Variant id = getArgValue(m_hpr->argId, "id");
@@ -168,6 +174,11 @@ int Server::errorCode() const
 bool Server::isActive() const
 {
     return m_hpr->active;
+}
+
+bool Server::isPrintInfo() const
+{
+    return m_hpr->printInfo;
 }
 
 float Server::step() const
@@ -283,7 +294,9 @@ void Server::eventChanged(const std::shared_ptr<Event>& event)
             m_hpr->hasDeployBreaked = false;
         }
         pending();
-        LOG_DEBUG(upgrade());
+        if (m_hpr->printInfo) {
+            LOG_DEBUG(upgrade());
+        }
         break;
     }
     case ServerEvent::REQ_CANCEL: {
@@ -386,7 +399,9 @@ void Server::eventChanged(const std::shared_ptr<Event>& event)
             LOG_WARNING("get ServerTransferEvent error");
             break;
         }
-        LOG_DEBUG(transferEvent->transfers());
+        if (m_hpr->printInfo) {
+            LOG_DEBUG(transferEvent->transfers());
+        }
         uint32_t all_current = 0;
         uint32_t all_total = 0;
         for (auto& d : m_hpr->details) {

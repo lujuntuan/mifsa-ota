@@ -37,6 +37,7 @@ public:
     Control control() const;
     int errorCode() const;
     bool isActive() const;
+    bool isPrintInfo() const;
     float step() const;
     float progress() const;
     void processDomainMessage(const DomainMessage& domainMessage);

@@ -18,5 +18,6 @@
     "distribute_port":8081,
     "download_dir":"/tmp/mifsa-ota-server",
     "cache_dir":"/tmp",
-    "upgrade_check_interval":5000
+    "upgrade_check_interval":5000,
+    "print_info":false
 }
