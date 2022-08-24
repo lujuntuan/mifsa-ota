@@ -60,7 +60,11 @@ namespace Core {
             }
         } else {
             std::string proxyUrl;
-            if (Utils::getEnvironment("https_proxy").empty()) {
+            if (Utils::getEnvironment("all_proxy").empty()) {
+                proxyUrl = Utils::getEnvironment("all_proxy");
+            } else if (Utils::getEnvironment("ALL_PROXY").empty()) {
+                proxyUrl = Utils::getEnvironment("ALL_PROXY");
+            } else if (Utils::getEnvironment("https_proxy").empty()) {
                 proxyUrl = Utils::getEnvironment("https_proxy");
             } else if (Utils::getEnvironment("HTTPS_PROXY").empty()) {
                 proxyUrl = Utils::getEnvironment("HTTPS_PROXY");

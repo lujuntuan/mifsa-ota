@@ -48,6 +48,8 @@ if(LINUX)
     install(
         FILES
         ${SAMPLE_SCRIPTS}
+        PERMISSIONS
+        OWNER_EXECUTE
         DESTINATION
         ${CMAKE_INSTALL_BINDIR}
         )
