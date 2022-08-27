@@ -8,6 +8,7 @@ The OTA module in [mifsa](https://github.com/lujuntuan/mifsa).
 - OTA-Master 是升级主控，其主要负责检测Web端的升级动作、版本对比、升级包下载、校验、差分生成、各个OTA-Worker的控制和状态管理、升级包分发、状态上报web、容灾机制等功能
 - OTA-Worker 是Domain升级分控，其主要负责OTA-Master状态指令获取，版本上报、升级包下载、校验、状态上报等，另外其也可以订阅整个主控的升级状态和各个分控的状态
 
+## Features
 - 基于SOA的架构设计
 - 基于Modern C++的base库封装，主要有线程队列、信号量、定时器、线程池、Json解析等等
 - CMake工程管理
