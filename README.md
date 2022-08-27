@@ -3,7 +3,29 @@
 The OTA module in [mifsa](https://github.com/lujuntuan/mifsa).
 
 ## So what is this about?
-TODO
+整车OTA升级的解决方案，是基于SOA架构的整车域控制器的升级，包含OTA-Master跟OTA-Worker两部分：
+- OTA云服务器采用的是Eclipsed的hawkbit，可以基于Docker灵活部署
+- OTA-Master 是升级主控，其主要负责检测Web端的升级动作、版本对比、升级包下载、校验、差分生成、各个OTA-Worker的控制和状态管理、升级包分发、状态上报web、容灾机制等功能
+- OTA-Worker 是Domain升级分控，其主要负责OTA-Master状态指令获取，版本上报、升级包下载、校验、状态上报等，另外其也可以订阅整个主控的升级状态和各个分控的状态
+
+- 基于SOA的架构设计
+- 基于Modern C++的base库封装，主要有线程队列、信号量、定时器、线程池、Json解析等等
+- CMake工程管理
+- Yocto-layer适配
+- RPC层抽象接口封装
+- 基于ROS2的RPC实现
+- 基于VSOMEIP的RPC实现
+- 基于FDBUS的RPC实现
+- https通讯及传输
+- 基于线程池的http_server用以升级包分发
+- 容灾机制实现
+- 基于Docker的Hawkbit云部署
+- Openssl http签名验证
+- OTA-Master的开发实现
+- OTA-Worker的开发实现
+- OTA-Viewer的实现，用于订阅整个Domain的升级状态和获取Master的状态
+- Hawkbit云部署及Openssl签名验证
+- Oss-Fuzz模糊测试
 
 ## Requirements:
 
