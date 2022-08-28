@@ -35,6 +35,10 @@ One of the following rpc communication libraries is required:
 
 Note: Also supports custom rpc.
 
+mifsa_ota_examples_viewer needs:
+
+- [QtWidgets](https://github.com/qt/qtbase)
+
 ## How to build:
 
 ```cmake
@@ -145,6 +149,26 @@ int main(int argc, char* argv[])
 ```
 
 Note: For more usage, please see the code in the [examples](examples) folder.
+
+## How to run
+
+This is a private hawkbit cloud service: [https://dcus.club](https://dcus.club)
+
+Note: username `dcus`, password `dcus1qaz@WSX`
+
+For example:
+
+```shell
+master_host> mifsa_ota_server -u https://dcus.club -t a16c62009a414d85043b19be9182fde0
+worker_host> mifsa_ota_client -n [domain_id]
+```
+
+You can also run the tests:
+
+```shell
+mifsa_ota_server -u https://dcus.club -t a16c62009a414d85043b19be9182fde0 -o
+mifsa_ota_example_sample_test.sh
+```
 
 ## Copyright:
 
