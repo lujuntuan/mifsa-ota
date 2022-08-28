@@ -4,6 +4,10 @@ The OTA module in [mifsa](https://github.com/lujuntuan/mifsa).
 
 Detailed documentation is found in [introduction](doc/introduction-zh.md)(中文).
 
+## What is hawkbit
+
+[hawkbit](https://www.eclipse.org/hawkbit)
+
 ## Features
 
 - Support batch upgrade, delayed upgrade, trigger upgrade, cancel upgrade and other operations
