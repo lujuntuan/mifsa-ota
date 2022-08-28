@@ -159,16 +159,20 @@ Note: username `dcus`, password `dcus1qaz@WSX`
 For example:
 
 ```shell
-master_host> mifsa_ota_server -u https://dcus.club -t a16c62009a414d85043b19be9182fde0
+master_host> mifsa_ota_server -u https://dcus.club -k 16c62009a414d85043b19be9182fde0
 worker_host> mifsa_ota_client -n [domain_id]
 ```
 
 You can also run the tests:
 
 ```shell
-mifsa_ota_server -u https://dcus.club -t a16c62009a414d85043b19be9182fde0 -o
+mifsa_ota_server -u https://dcus.club -k 16c62009a414d85043b19be9182fde0 -o
 mifsa_ota_example_sample_test.sh
 ```
+
+![doc/images/hawkbit-screenshot.png](doc/images/hawkbit-screenshot.png)
+
+![doc/images/viewer-screenshot.png](doc/images/viewer-screenshot.png)
 
 ## Copyright:
 
